@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@700&display=swap');
+@import "tailwindcss";
+
+/* Temel ayarlar */
+body, #root {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #14182e 60%, #23263a 100%);
+  font-family: 'Inter', 'Montserrat', Arial, sans-serif;
+  color: #f5f5fa;
+}
+
+/* Header - Başlık ve Sunucu IP */
+.header-title {
+  @apply text-4xl font-extrabold tracking-tight text-yellow-400 drop-shadow;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+.server-ip {
+  @apply bg-gray-800 px-4 py-2 rounded-md font-mono text-xs tracking-wide border border-gray-700 shadow;
+  color: #ffe066;
+  transition: background 0.13s, color 0.13s;
+  cursor: pointer;
+  user-select: all;
+}
+.server-ip:hover {
+  background: #ffe066;
+  color: #23263a;
+}
+
+/* TabMenu */
+.tab-active {
+  @apply bg-gray-900 border-b-2 border-yellow-400 shadow-md font-bold text-yellow-100;
+  transition: background 0.12s, color 0.12s;
+}
+.tab-inactive {
+  @apply opacity-70 hover:bg-gray-800 hover:opacity-100 transition font-semibold text-gray-100;
+}
+
+/* Tier Card */
+.tier-card {
+  @apply rounded-xl shadow-lg bg-[#23263a]/90 border-t-4 px-4 py-4;
+  min-width: 180px;
+  max-width: 220px;
+  margin-bottom: 1.2rem;
+  transition: box-shadow 0.14s, transform 0.14s;
+}
+.tier-card:hover {
+  box-shadow: 0 6px 24px #ffe06622, 0 2px 8px #0001;
+  transform: translateY(-2px) scale(1.03);
+}
+.tier-title {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #ffe066;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.9rem;
+  text-align: center;
+}
+
+/* Player Card */
+.player-card {
+  @apply flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-800/70 transition cursor-pointer;
+  background: transparent;
+  border: 1.3px solid #222538;
+  margin-bottom: 0.22rem;
+}
+.player-card:hover {
+  border-color: #ffe06655;
+  box-shadow: 0 2px 8px #ffe06633;
+}
+.player-card span {
+  @apply text-yellow-50 font-medium text-base tracking-tight;
+  letter-spacing: 0.01em;
+}
+.player-card img {
+  border-radius: 0.55rem;
+  box-shadow: 0 1px 5px #0003;
+  width: 28px;
+  height: 28px;
+}
+
+/* Tier renk çubuğu */
+.lh-bar {
+  width: 6px !important;
+  height: 30px !important;
+  border-radius: 3px;
+  margin-right: 6px;
+  display: block !important;
+}
+.ht-bar { background: #22c55e !important; }
+.lt-bar { background: #ef4444 !important; }
+
+/* Modal */
+.profile-modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 24, 46, 0.83);
+  backdrop-filter: blur(2.5px);
+}
+.profile-modal {
+  background: #22243b;
+  border-radius: 1.6rem;
+  box-shadow: 0 8px 32px 0 #0008, 0 2px 8px 0 #0003;
+  padding: 2.1rem 2rem 1.5rem 2rem;
+  min-width: 300px;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  animation: modalIn 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.94);}
+  to { opacity: 1; transform: scale(1);}
+}
+.profile-modal-x {
+  position: absolute;
+  right: 1.1rem;
+  top: 1.1rem;
+  background: #35395a;
+  color: #fff;
+  border-radius: 999px;
+  width: 2.3rem;
+  height: 2.3rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 2px 6px #0003;
+}
+.profile-modal-x:hover {
+  background: #e05353;
+}
+.profile-avatar {
+  border-radius: 999px;
+  box-shadow: 0 3px 18px #0002;
+  border: 3px solid #232638;
+  background: #2d314b;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 0.7rem;
+}
+.profile-username {
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+  text-align: center;
+  letter-spacing: 0.03em;
+}
+.profile-position-box {
+  background: #222d46;
+  border-radius: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 1rem;
+  margin-bottom: 0.7rem;
+  margin-top: 0.08rem;
+  box-shadow: 0 2px 8px #0001;
+}
+.profile-pos-label {
+  color: #ffdb71;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+.profile-namemc {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #e0e7ff;
+  background: #282c49;
+  padding: 0.25rem 0.85rem;
+  border-radius: 0.6rem;
+  font-size: 0.97rem;
+  margin-bottom: 1.2rem;
+  text-decoration: none;
+  transition: background 0.15s;
+  font-weight: 500;
+  margin-top: 0.7rem;
+}
+.profile-namemc:hover {
+  background: #374151;
+}
+
+/* Navbar */
+.navbar-bg {
+  @apply flex items-center justify-between w-full px-6 py-3;
+  background: linear-gradient(90deg, #181c2a 80%, #23263a 100%);
+  border-bottom: 2px solid #ffe06622;
+  min-height: 65px;
+  z-index: 40;
+  box-shadow: 0 4px 24px 0 #0003;
+}
+.navbar-title {
+  font-family: 'Montserrat', 'Segoe UI', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  font-size: 1.5rem;
+  color: #ffe066;
+  white-space: nowrap;
+}
+.navbar-mode-badge {
+  background: #21243a;
+  color: #f1c94c;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 1.2rem;
+  border: 2px solid #ffd70033;
+  letter-spacing: 0.03em;
+  margin-right: 0.15rem;
+  box-shadow: 0 2px 10px #0001;
+  cursor: pointer;
+  transition: 
+    background 0.14s,
+    color 0.14s,
+    border 0.16s,
+    box-shadow 0.16s,
+    transform 0.16s;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+.navbar-mode-badge.active,
+.navbar-mode-badge:hover {
+  background: linear-gradient(90deg, #fef9c3 60%, #ffe066 100%);
+  color: #232638;
+  border-color: #ffd700;
+  box-shadow: 0 4px 16px #f7e9b044;
+  transform: scale(1.06);
+}
+
+/* Navbar links */
+.navbar-link {
+  color: #ffe066;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.28rem 0.95rem;
+  border-radius: 0.6rem;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
+  text-decoration: none;
+  position: relative;
+}
+.navbar-link:hover {
+  color: #232638;
+  background: #ffe066;
+  transform: translateY(-2px) scale(1.07);
+  box-shadow: 0 2px 8px #ffe06644;
+}
+
+/* Search */
+.navbar-search {
+  background: #181b2a;
+  border: 1.2px solid #232638;
+  color: #ffe066;
+  border-radius: 0.7rem;
+  padding: 0.36rem 1rem 0.36rem 2.1rem;
+  font-size: 0.98rem;
+  outline: none;
+  transition: 
+    border 0.13s,
+    width 0.18s,
+    box-shadow 0.16s;
+  box-shadow: 0 2px 8px #0002;
+  min-width: 110px;
+}
+.navbar-search:focus {
+  border-color: #ffd700;
+  box-shadow: 0 1px 8px #ffd70033;
+}
+.navbar-search-icon {
+  position: absolute;
+  left: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffe066;
+  font-size: 1.08rem;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .tier-card { min-width: 160px; max-width: 180px; }
+  .navbar-bg { flex-direction: column; gap: 0.8rem; }
+}
+@media (max-width: 700px) {
+  .tier-card { min-width: 100px; max-width: 98vw; padding: 1rem 0.6rem; }
+  .navbar-title { font-size: 1.1rem; }
+  .navbar-bg { padding-left: 0.7rem; padding-right: 0.7rem; }
+}
+@media (max-width: 500px) {
+  .tier-card { min-width: 94vw; max-width: 100vw; }
+  .profile-modal { min-width: 96vw; padding: 1.1rem 0.4rem; }
+}
+.custom-scrollbar-container {
+  scrollbar-width: thin;
+  scrollbar-color: #ffe066 #23263a; /* Firefox */
+  transition: box-shadow 0.16s;
+}
+.custom-scrollbar-container::-webkit-scrollbar {
+  height: 7px;
+  background: transparent;
+  transition: opacity 0.18s;
+  opacity: 0;
+}
+.custom-scrollbar-container.show-scrollbar::-webkit-scrollbar {
+  opacity: 1;
+}
+.custom-scrollbar-container::-webkit-scrollbar-thumb {
+  background: #ffe066cc;
+  border-radius: 6px;
+  min-width: 40px;
+}
+.custom-scrollbar-container::-webkit-scrollbar-track {
+  background: #23263a;
+  border-radius: 6px;
+}
+
+/* SCROLLBAR ÜSTTE! */
+.custom-scrollbar-top {
+  pointer-events: none;
+  height: 8px;
+  background: none;
+}
+.custom-scrollbar-container.show-scrollbar ~ .custom-scrollbar-top,
+.custom-scrollbar-container:focus-within ~ .custom-scrollbar-top {
+  background: linear-gradient(90deg,#ffe066bb 50%,transparent 100%);
+  border-radius: 6px 6px 0 0;
+}

@@ -1,0 +1,74 @@
+{
+  "NethOP": {
+    "Tier 1": [
+      { "name": "show_y", "tierType": "HT", "lastTested": "2025-06-30" },
+      { "name": "Marlowww", "tierType": "LT", "lastTested": "2025-06-27" },
+      { "name": "PvPExpert", "tierType": "HT", "lastTested": "2025-06-29" },
+      { "name": "FastBridger", "tierType": "HT", "lastTested": "2025-06-26" },
+      { "name": "BlockKing", "tierType": "LT", "lastTested": "2025-06-27" },
+      { "name": "Zappy", "tierType": "HT", "lastTested": "2025-06-28" },
+      { "name": "EnderPro", "tierType": "LT", "lastTested": "2025-06-25" },
+      { "name": "SharpPvP", "tierType": "HT", "lastTested": "2025-06-24" },
+      { "name": "Comboz", "tierType": "HT", "lastTested": "2025-06-23" },
+      { "name": "CritMaster", "tierType": "LT", "lastTested": "2025-06-22" },
+      { "name": "BowLegend", "tierType": "HT", "lastTested": "2025-06-21" },
+      { "name": "Frosty", "tierType": "LT", "lastTested": "2025-06-20" }
+    ],
+    "Tier 2": [
+      { "name": "360Mall", "tierType": "HT", "lastTested": "2025-06-28" },
+      { "name": "catboyxpera", "tierType": "LT", "lastTested": "2025-06-29" },
+      { "name": "Hotbar", "tierType": "HT", "lastTested": "2025-06-27" },
+      { "name": "Kenzo", "tierType": "LT", "lastTested": "2025-06-26" },
+      { "name": "BuildGod", "tierType": "HT", "lastTested": "2025-06-25" },
+      { "name": "MisterPvP", "tierType": "LT", "lastTested": "2025-06-24" },
+      { "name": "Clicker", "tierType": "HT", "lastTested": "2025-06-23" },
+      { "name": "XenoPvP", "tierType": "LT", "lastTested": "2025-06-22" },
+      { "name": "ShadowBlade", "tierType": "HT", "lastTested": "2025-06-21" },
+      { "name": "BlazeFury", "tierType": "LT", "lastTested": "2025-06-20" },
+      { "name": "Versatile", "tierType": "HT", "lastTested": "2025-06-19" },
+      { "name": "Zinco", "tierType": "LT", "lastTested": "2025-06-18" }
+    ],
+    "Tier 3": [
+      { "name": "DippyEU", "tierType": "HT", "lastTested": "2025-06-25" },
+      { "name": "Enlock", "tierType": "LT", "lastTested": "2025-06-26" },
+      { "name": "Cloudz", "tierType": "HT", "lastTested": "2025-06-24" },
+      { "name": "SkyHopper", "tierType": "LT", "lastTested": "2025-06-23" },
+      { "name": "Fenix", "tierType": "HT", "lastTested": "2025-06-22" },
+      { "name": "RagePvP", "tierType": "LT", "lastTested": "2025-06-21" },
+      { "name": "FlexX", "tierType": "HT", "lastTested": "2025-06-20" },
+      { "name": "Sparrow", "tierType": "LT", "lastTested": "2025-06-19" },
+      { "name": "WildWolf", "tierType": "HT", "lastTested": "2025-06-18" },
+      { "name": "Xtronic", "tierType": "LT", "lastTested": "2025-06-17" },
+      { "name": "Brawler", "tierType": "HT", "lastTested": "2025-06-16" },
+      { "name": "LadderGod", "tierType": "LT", "lastTested": "2025-06-15" }
+    ],
+    "Tier 4": [
+      { "name": "cresssy", "tierType": "HT", "lastTested": "2025-06-24" },
+      { "name": "zu8", "tierType": "LT", "lastTested": "2025-06-21" },
+      { "name": "NoobSlayer", "tierType": "HT", "lastTested": "2025-06-20" },
+      { "name": "QuickSwitch", "tierType": "LT", "lastTested": "2025-06-19" },
+      { "name": "BlueJay", "tierType": "HT", "lastTested": "2025-06-18" },
+      { "name": "FireFist", "tierType": "LT", "lastTested": "2025-06-17" },
+      { "name": "Stormy", "tierType": "HT", "lastTested": "2025-06-16" },
+      { "name": "Volley", "tierType": "LT", "lastTested": "2025-06-15" },
+      { "name": "Sniper", "tierType": "HT", "lastTested": "2025-06-14" },
+      { "name": "Rusher", "tierType": "LT", "lastTested": "2025-06-13" },
+      { "name": "Pixelated", "tierType": "HT", "lastTested": "2025-06-12" },
+      { "name": "Faithful", "tierType": "LT", "lastTested": "2025-06-11" }
+    ],
+    "Tier 5": [
+      { "name": "HighTierTweee", "tierType": "HT", "lastTested": "2025-06-20" },
+      { "name": "ILoveBatdzzi", "tierType": "LT", "lastTested": "2025-06-19" },
+      { "name": "Versilver", "tierType": "HT", "lastTested": "2025-06-18" },
+      { "name": "dehydrated_", "tierType": "LT", "lastTested": "2025-06-17" },
+      { "name": "Ponker1234", "tierType": "HT", "lastTested": "2025-06-16" },
+      { "name": "1267k", "tierType": "LT", "lastTested": "2025-06-15" },
+      { "name": "Chubigbuns", "tierType": "HT", "lastTested": "2025-06-14" },
+      { "name": "Jord__", "tierType": "LT", "lastTested": "2025-06-13" },
+      { "name": "muyo90", "tierType": "HT", "lastTested": "2025-06-12" },
+      { "name": "_Cytryx", "tierType": "LT", "lastTested": "2025-06-11" },
+      { "name": "_Not_Night_XD", "tierType": "HT", "lastTested": "2025-06-10" },
+      { "name": "xVBF", "tierType": "LT", "lastTested": "2025-06-09" }
+    ]
+  }
+}
