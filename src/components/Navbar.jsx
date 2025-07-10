@@ -18,7 +18,7 @@ export default function Navbar({
       {/* Sol tarafta Logo ve başlık */}
       <div className="flex items-center gap-3">
         <img
-          src="src/components/6faeb9b56bbc7622eadf32975f7d82f9.png"
+          src="./6faeb9b56bbc7622eadf32975f7d82f9.png"
           alt="Logo"
           className="h-9 w-9 rounded bg-yellow-300/80 border border-yellow-400"
         />
@@ -69,7 +69,6 @@ export default function Navbar({
           </span>
         </div>
 
-        {/* Discord butonu */}
         <a
           href="https://discord.gg/trneth" // kendi Discord davet linkinle değiştir
           target="_blank"

@@ -1,19 +1,37 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import TierList from "../components/TierList";
 import PlayerProfileModal from "../components/PlayerProfileModal";
 import Signature from "../components/Signature";
-import tiersData from "../data/tiers.json";
 
-const modes = Object.keys(tiersData);
+// Artık tiersData'yı kaldırıyoruz ve mod listesini sabit tanımlıyoruz
+const modes = ["NethOP"]; // Gerekirse backend'den /api/modes çekebilirsin
 
 export default function Main() {
   const [activeMode, setActiveMode] = useState(modes[0]);
+  const [tiersData, setTiersData] = useState({});
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [search, setSearch] = useState("");
   const containerRef = useRef();
 
-  const filteredTierLists = Object.entries(tiersData[activeMode])
+  // Backend'den oyuncu listesini çek
+  useEffect(() => {
+async function fetchTiers() {
+  try {
+    const response = await fetch(`https://api.sstashy.io/api.php?route=tiers&mode=${encodeURIComponent(activeMode)}`);
+    const data = await response.json();
+    console.log("API'den gelen data:", data); // ← bunu ekle
+    setTiersData(data);
+  } catch (err) {
+    console.error("Veri çekilemedi:", err); // ← hata detayını yazdır
+    setTiersData({});
+  }
+}
+
+    fetchTiers();
+  }, [activeMode]);
+
+  const filteredTierLists = Object.entries(tiersData)
     .map(([tier, players], idx) => {
       const filteredPlayers = search.trim().length > 0
         ? players.filter(player =>

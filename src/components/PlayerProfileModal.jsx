@@ -12,6 +12,15 @@ export default function PlayerProfileModal({ player, onClose }) {
           className="profile-avatar"
         />
         <div className="profile-username">{player.name}</div>
+        
+        {/* Burada ID'yi gösteriyoruz */}
+        {player.id && (
+          <div className="profile-id-box">
+            <span className="profile-pos-label">ID:</span>
+            <span className="bg-gray-700 px-2 rounded">{player.id}</span>
+          </div>
+        )}
+
         <div className="profile-position-box">
           <span className="profile-pos-label">Tier:</span>
           <span className="bg-gray-800 px-2 rounded">{player.tier}</span>
