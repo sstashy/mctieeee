@@ -8,6 +8,7 @@ export default function PlayerCard({ player, onClick }) {
       tabIndex={0}
       onKeyDown={e => (e.key === "Enter" || e.key === " ") && onClick()}
       aria-label={player.name}
+      title={player.name}
     >
       {/* Çubuk: shrink-0 ve flex-none ile asla kaybolmaz */}
       <span
@@ -24,7 +25,7 @@ export default function PlayerCard({ player, onClick }) {
         loading="lazy"
       />
       {/* İsim: min-w-0 ve truncate ile taşarsa ... olur, çubuk ve resim asla kaybolmaz */}
-      <span className="text-yellow-50 font-medium text-base tracking-tight min-w-0 truncate block">
+      <span className="player-name-ellipsis text-yellow-50 font-medium text-base tracking-tight min-w-0 truncate block">
         {player.name}
       </span>
     </li>
