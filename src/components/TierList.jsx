@@ -10,12 +10,19 @@ const tierBorderColors = [
 ];
 
 export default function TierList({ title, players, idx, onPlayerClick }) {
+  const borderColor = tierBorderColors[idx % tierBorderColors.length];
+
   return (
-    <div className={`tier-card border-t-4 ${tierBorderColors[idx % tierBorderColors.length]} bg-gray-800/60`}>
-      <h2 className="tier-title">{title}</h2>
-      <ul>
+    <div
+      className={`tier-card border-t-4 ${borderColor} bg-gray-800/60 flex-shrink-0`}
+      style={{ minWidth: 180, maxWidth: 260, flex: "1 1 0px" }}
+    >
+      <h2 className="tier-title text-center font-bold text-lg py-2">{title}</h2>
+      <ul className="player-list w-full flex flex-col gap-1 px-2 pb-2">
         {players.map((player) => (
-          <PlayerCard key={player.name} player={player} onClick={() => onPlayerClick(player)} />
+          <li key={player.name}>
+            <PlayerCard player={player} onClick={() => onPlayerClick(player)} />
+          </li>
         ))}
       </ul>
     </div>

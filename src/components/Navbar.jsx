@@ -48,7 +48,7 @@ export default function Navbar({ onSearch }) {
           <span>
             Galaxy <span className="navbar-title-highlight">Tier</span>
           </span>
-          <span className="navbar-subtitle">Competitive Minecraft</span>
+          <span className="navbar-subtitle">NethPOT Community</span>
         </span>
       </div>
 

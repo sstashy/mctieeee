@@ -28,29 +28,38 @@ export default function LoginForm({ onLogin }) {
   };
 
   return (
-    <form onSubmit={handleLogin} className="p-4 bg-gray-800 rounded max-w-sm mx-auto flex flex-col gap-3">
-      <h2 className="text-xl font-bold text-yellow-200">Giriş Yap</h2>
+    <form
+      onSubmit={handleLogin}
+      className="flex flex-col gap-6 bg-[#23263ae6] rounded-2xl p-8 relative z-20 animate-fade-in"
+    >
+      <h2 className="text-3xl font-extrabold text-[#5ea4ff] text-center tracking-wider mb-2 drop-shadow-lg animate-slide-down flex items-center justify-center gap-2">
+      
+        Giriş Yap
+      </h2>
       <input
-        className="p-2 rounded bg-gray-700 text-yellow-50"
+        className="px-5 py-4 rounded-xl bg-[#181c2a] text-blue-100 border border-[#334067] focus:outline-none focus:ring-2 focus:ring-[#5ea4ff] transition-all duration-200 shadow-md placeholder:italic"
         placeholder="Kullanıcı Adı"
         value={username}
         onChange={e=>setUsername(e.target.value)}
         required
-        autoComplete="username"
       />
       <input
-        className="p-2 rounded bg-gray-700 text-yellow-50"
+        className="px-5 py-4 rounded-xl bg-[#181c2a] text-blue-100 border border-[#334067] focus:outline-none focus:ring-2 focus:ring-[#5ea4ff] transition-all duration-200 shadow-md placeholder:italic"
         type="password"
         placeholder="Şifre"
         value={password}
         onChange={e=>setPassword(e.target.value)}
         required
-        autoComplete="current-password"
       />
-      <button className="bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded hover:bg-yellow-500 transition" type="submit" disabled={loading}>
+      <button
+        className="bg-gradient-to-r from-[#5ea4ff] via-[#82cfff] to-[#5ea4ff] text-white font-bold px-6 py-3 rounded-xl shadow-xl hover:from-[#82cfff] hover:to-[#5ea4ff] hover:text-[#23263a] hover:scale-105 hover:shadow-neon transition-all duration-200 border border-[#82cfff] animate-button-pop flex items-center justify-center gap-2"
+        type="submit"
+        disabled={loading}
+      >
+        <svg className="w-5 h-5 text-white mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
         {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
-      {error && <div className="text-red-400 text-sm">{error}</div>}
+      {error && <div className="text-red-400 text-md text-center font-semibold animate-error-pop">{error}</div>}
     </form>
   );
 }
