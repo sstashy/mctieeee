@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AuthModal from "./AuthModal";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
+import LoginForm from "../forms/LoginForm";
+import RegisterForm from "../forms/RegisterForm";
 import UserMenu from "./UserMenu";
 import {
   FaDiscord,

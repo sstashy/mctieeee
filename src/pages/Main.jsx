@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import Navbar from "../components/Navbar";
-import TierList from "../components/TierList";
-import PlayerProfileModal from "../components/PlayerProfileModal";
-import Signature from "../components/Signature";
+import Navbar from "../components/menus/Navbar";
+import TierList from "../components/lists/TierList";
+import PlayerProfileModal from "../components/modals/PlayerProfileModal";
+import Signature from "../components/common/Signature";
 
 const modes = ["NethOP"];
 const fixedTiers = [
@@ -28,7 +28,6 @@ export default function Main() {
           `https://api.sstashy.io/api.php?route=tiers&mode=${encodeURIComponent(activeMode)}`
         );
         const data = await response.json();
-        // Normalize: { "Tier 1": [oyuncular], ... } → dizi
         let normalized = [];
         if (Array.isArray(data)) {
           normalized = data;
