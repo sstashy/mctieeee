@@ -1,65 +1,139 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useAuth } from "../context/AuthContext";
+import { login as loginAPI } from "../services/api";
+import AuthInput from "./AuthInput";
+import PasswordField from "./PasswordField";
+import AuthSubmitButton from "./AuthSubmitButton";
+import ErrorMessage from "../common/ErrorMessage";
 
-export default function LoginForm({ onLogin }) {
+/**
+ * LoginForm
+ * Yeni API client login() dönüşü:
+ * {
+ *   ok: boolean,
+ *   status: number,
+ *   token: string|null,
+ *   user: { id?, username } | null,
+ *   error: string|null
+ * }
+ */
+export default function LoginForm({ onSuccess, onError }) {
+  const { login } = useAuth();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
+  const abortRef = useRef(null);
 
-  const handleLogin = async (e) => {
+  // Input değişince global error temizle
+  useEffect(() => {
+    if (globalError) setGlobalError("");
+  }, [username, password, globalError]);
+
+  // Unmount'ta isteği iptal
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
+  const validate = useCallback(() => {
+    const errs = {};
+    if (!username.trim()) errs.username = "Kullanıcı adı gerekli.";
+    if (!password) errs.password = "Şifre gerekli.";
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }, [username, password]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
+    if (loading) return;
+    if (!validate()) return;
+
     setLoading(true);
-    const res = await fetch("https://api.sstashy.io/auth/login.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (data.success) {
-      localStorage.setItem("user", JSON.stringify({ username, token: data.token }));
-      setUsername("");
-      setPassword("");
-      onLogin?.(data);
-    } else {
-      setError(data.error || "Giriş başarısız");
+    setGlobalError("");
+
+    // Önceki isteği iptal et
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+
+    try {
+      const res = await loginAPI(username.trim(), password, {
+        signal: abortRef.current.signal
+      });
+
+      if (res.ok) {
+        // Auth context'e user + token ilet
+        login({
+          username: res.user?.username || username.trim(),
+            id: res.user?.id,
+          token: res.token,
+          loggedAt: Date.now()
+        });
+
+        // Formu sıfırla
+        setUsername("");
+        setPassword("");
+        onSuccess?.(res);
+      } else {
+        setGlobalError(res.error || "Giriş başarısız.");
+        onError?.(res);
+      }
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setGlobalError("Sunucuya ulaşılamıyor.");
+      onError?.(err);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
     <form
-      onSubmit={handleLogin}
-      className="flex flex-col gap-6 bg-[#23263ae6] rounded-2xl p-8 relative z-20 animate-fade-in"
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-6 bg-[#23263ae6] rounded-2xl p-8 shadow-xl relative z-20 w-full max-w-md"
+      aria-label="Giriş Formu"
+      noValidate
     >
-      <h2 className="text-3xl font-extrabold text-[#5ea4ff] text-center tracking-wider mb-2 drop-shadow-lg animate-slide-down flex items-center justify-center gap-2">
-      
+      <h2 className="text-3xl font-extrabold text-[#5ea4ff] text-center tracking-wider mb-2 drop-shadow-lg">
         Giriş Yap
       </h2>
-      <input
-        className="px-5 py-4 rounded-xl bg-[#181c2a] text-blue-100 border border-[#334067] focus:outline-none focus:ring-2 focus:ring-[#5ea4ff] transition-all duration-200 shadow-md placeholder:italic"
+
+      <AuthInput
+        id="login-username"
+        label="Kullanıcı Adı"
+        autoComplete="username"
         placeholder="Kullanıcı Adı"
         value={username}
-        onChange={e=>setUsername(e.target.value)}
-        required
+        onChange={e => setUsername(e.target.value)}
+        error={fieldErrors.username}
+        maxLength={32}
       />
-      <input
-        className="px-5 py-4 rounded-xl bg-[#181c2a] text-blue-100 border border-[#334067] focus:outline-none focus:ring-2 focus:ring-[#5ea4ff] transition-all duration-200 shadow-md placeholder:italic"
-        type="password"
-        placeholder="Şifre"
+
+      <PasswordField
+        id="login-password"
+        label="Şifre"
         value={password}
-        onChange={e=>setPassword(e.target.value)}
-        required
+        onChange={e => setPassword(e.target.value)}
+        autoComplete="current-password"
+        error={fieldErrors.password}
       />
-      <button
-        className="bg-gradient-to-r from-[#5ea4ff] via-[#82cfff] to-[#5ea4ff] text-white font-bold px-6 py-3 rounded-xl shadow-xl hover:from-[#82cfff] hover:to-[#5ea4ff] hover:text-[#23263a] hover:scale-105 hover:shadow-neon transition-all duration-200 border border-[#82cfff] animate-button-pop flex items-center justify-center gap-2"
-        type="submit"
-        disabled={loading}
+
+      {globalError && (
+        <ErrorMessage
+          message={globalError}
+          variant="error"
+          dismissible
+          onClose={() => setGlobalError("")}
+        />
+      )}
+
+      <AuthSubmitButton
+        loading={loading}
+        loadingText="Giriş yapılıyor..."
       >
-        <svg className="w-5 h-5 text-white mr-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
-        {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-      </button>
-      {error && <div className="text-red-400 text-md text-center font-semibold animate-error-pop">{error}</div>}
+        Giriş Yap
+      </AuthSubmitButton>
     </form>
   );
 }
