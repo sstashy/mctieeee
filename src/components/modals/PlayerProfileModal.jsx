@@ -1,30 +1,33 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import PropTypes from "prop-types";
 import useFocusTrap from "../hooks/useFocusTrap";
 import useLockBodyScroll from "../hooks/useLockBodyScroll";
 import { useAuth } from "../context/AuthContext";
-import CommentsModal from "./CommentsModal"; // İstersen alternatif sekmeli sistemi kullan
+import CommentsModal from "./CommentsModal";
 
 export default function PlayerProfileModal({ player, onClose }) {
   const panelRef = useRef(null);
-  const { user } = useAuth();
+  const { user } = useAuth(); // (Şu an kullanılmıyor ama ileride yetki kontrolü için kalsın)
   const [showComments, setShowComments] = useState(false);
 
-  useFocusTrap(panelRef, !!player);
-  useLockBodyScroll(!!player);
+  const open = !!player;
+
+  useFocusTrap(panelRef, open);
+  useLockBodyScroll(open);
 
   useEffect(() => {
-    if (!player) return;
+    if (!open) return;
     const esc = (e) => {
       if (e.key === "Escape") {
         if (showComments) setShowComments(false);
         else onClose?.();
       }
     };
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [player, showComments, onClose]);
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [open, showComments, onClose]);
 
-  if (!player) return null;
+  if (!open) return null;
 
   return (
     <div
@@ -38,7 +41,7 @@ export default function PlayerProfileModal({ player, onClose }) {
     >
       <div
         ref={panelRef}
-        className="relative w-full max-w-md rounded-2xl border border-[#28304a] bg-[#23263af2] shadow-2xl px-8 py-10 flex flex-col focus:outline-none"
+        className="relative w-full max-w-md rounded-2xl border border-[#28304a] bg-[#23263af2] shadow-xl px-8 py-10 flex flex-col focus:outline-none transition-transform translate-y-0 animate-slide-down"
       >
         <button
           type="button"
@@ -77,7 +80,7 @@ export default function PlayerProfileModal({ player, onClose }) {
               </span>
             )}
           </div>
-          <div className="text-lg font-semibold text-gray-100 mb-4">
+          <div className="text-lg font-semibold text-gray-100 mb-3">
             {player.name}
           </div>
 
@@ -87,7 +90,7 @@ export default function PlayerProfileModal({ player, onClose }) {
             </span>
           </InfoRow>
 
-            <InfoRow label="Tür">
+          <InfoRow label="Tür">
             {player.tierType === "HT" ? (
               <span className="text-green-400 font-bold">HT</span>
             ) : (
@@ -133,6 +136,17 @@ export default function PlayerProfileModal({ player, onClose }) {
   );
 }
 
+PlayerProfileModal.propTypes = {
+  player: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string.isRequired,
+    tier: PropTypes.string,
+    tierType: PropTypes.string,
+    lastTested: PropTypes.string
+  }),
+  onClose: PropTypes.func
+};
+
 function InfoRow({ label, children }) {
   return (
     <div className="flex items-center gap-2 mb-2 w-full justify-center">
@@ -141,3 +155,8 @@ function InfoRow({ label, children }) {
     </div>
   );
 }
+
+InfoRow.propTypes = {
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node
+};

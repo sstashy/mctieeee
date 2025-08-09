@@ -56,7 +56,7 @@ src/
 - `src/components/modals/PlayerProfileModal.jsx`: Oyuncu profil modalı
 - `src/components/modals/CommentsModal.jsx`: Yorum modalı
 - `src/components/menus/AuthModal.jsx`: Giriş/Kayıt modalı
-- `src/components/services/api.js`: API bağlantıları
+- `src/components/services/apiClient.js`: API bağlantıları
 
 ## Katkı Sağlama
 

@@ -1,5 +1,11 @@
-import React, { useState, useCallback, useMemo } from "react";
-import AuthModal from "./AuthModal";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect
+} from "react";
+import AuthModal from "../modals/AuthModal";
 import LoginForm from "../forms/LoginForm";
 import RegisterForm from "../forms/RegisterForm";
 import UserMenu from "./UserMenu";
@@ -13,19 +19,38 @@ import {
   FaTrophy,
   FaBoxOpen,
   FaMoon,
-  FaSun,
+  FaSun
 } from "react-icons/fa";
+import clsx from "clsx";
 
-// Basit debounce hook (isteğe göre ayrı dosyaya çıkarılabilir)
-function useDebouncedCallback(fn, delay, deps = []) {
-  const memo = React.useRef({ fn, timer: null });
-  memo.current.fn = fn;
-  return useCallback((...args) => {
-    if (memo.current.timer) clearTimeout(memo.current.timer);
-    memo.current.timer = setTimeout(() => memo.current.fn(...args), delay);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [delay, ...deps]);
+/* Debounce + raf combine (daha stabil input hissi) */
+function useRafDebounce(fn, delay) {
+  const ref = useRef({ fn, timer: null, frame: null });
+  ref.current.fn = fn;
+
+  const clear = () => {
+    if (ref.current.timer) clearTimeout(ref.current.timer);
+    if (ref.current.frame) cancelAnimationFrame(ref.current.frame);
+  };
+
+  useEffect(() => clear, []);
+  return useCallback(
+    (...args) => {
+      clear();
+      ref.current.timer = setTimeout(() => {
+        ref.current.frame = requestAnimationFrame(() => ref.current.fn(...args));
+      }, delay);
+    },
+    [delay]
+  );
 }
+
+const NAV_LINKS = Object.freeze([
+  { href: "/", icon: FaHome, label: "Home" },
+  { href: "/clans", icon: FaUsers, label: "Klanlar" },
+  { href: "/tournaments", icon: FaTrophy, label: "Turnuvalar" },
+  { href: "/resourcepacks", icon: FaBoxOpen, label: "Resource Packs" }
+]);
 
 export default function Navbar({ onSearch }) {
   const { user, logout } = useAuth();
@@ -35,104 +60,120 @@ export default function Navbar({ onSearch }) {
   const [showRegister, setShowRegister] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const handleLoginSuccess = () => setShowLogin(false);
-  const handleRegisterSuccess = () => setShowRegister(false);
-
-  const debouncedSearch = useDebouncedCallback((val) => {
+  const debouncedSearch = useRafDebounce(val => {
     onSearch?.(val);
-  }, 250, []);
+  }, 250);
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = e => {
     const val = e.target.value;
     setSearchValue(val);
     debouncedSearch(val);
   };
 
-  const navLinks = useMemo(() => ([
-    { href: "/", icon: FaHome, label: "Home" },
-    { href: "/clans", icon: FaUsers, label: "Klanlar" },
-    { href: "/tournaments", icon: FaTrophy, label: "Turnuvalar" },
-    { href: "/resourcepacks", icon: FaBoxOpen, label: "Resource Packs" },
-  ]), []);
+  const handleLoginSuccess = () => setShowLogin(false);
+  const handleRegisterSuccess = () => setShowRegister(false);
+
+  const linkItems = useMemo(
+    () =>
+      NAV_LINKS.map(link => {
+        const Icon = link.icon;
+        return (
+          <li key={link.href} role="none">
+            <a
+              href={link.href}
+              className="menu-link focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff]"
+              role="menuitem"
+            >
+              <Icon className="opacity-80 shrink-0" />
+              <span className="hidden sm:inline">{link.label}</span>
+            </a>
+          </li>
+        );
+      }),
+    []
+  );
 
   return (
     <nav
-      className="navbar-bg beautiful-navbar navbar-elevated flex items-center justify-between gap-4 py-2 px-4"
-      aria-label="Ana Navigasyon"
+      className={clsx(
+        "navbar-bg beautiful-navbar flex items-center justify-between gap-4 py-2 px-4",
+        "animate-fade-in"
+      )}
+      aria-label="Ana navigasyon"
     >
-      {/* Sol Logo */}
-      <div className="flex items-center gap-3 min-w-36">
-        <a href="/" className="navbar-logo-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff] rounded">
+      {/* Logo & Title */}
+      <div className="flex items-center gap-3 min-w-40">
+        <a
+          href="/"
+          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff] rounded-lg"
+        >
           <img
             src="https://tier.sstashy.io/6faeb9b56bbc7622eadf32975f7d82f9.png"
             alt="Site logosu"
             className="navbar-logo"
-            width={46}
-            height={46}
+            width={42}
+            height={42}
+            decoding="async"
+            loading="eager"
+            fetchPriority="high"
             draggable={false}
           />
         </a>
-        <div className="navbar-title flex flex-col leading-tight">
-          <span className="font-semibold tracking-tight text-lg">
-            Galaxy <span className="navbar-title-highlight font-bold">Tier</span>
+        <div className="navbar-title">
+          <span className="font-semibold tracking-tight text-base sm:text-lg">
+            Galaxy{" "}
+            <span className="navbar-title-highlight font-bold">Tier</span>
           </span>
-          <span className="navbar-subtitle text-[11px] uppercase tracking-wider text-gray-300 mt-[1px]">
+          <span className="navbar-subtitle text-[11px] uppercase tracking-wider text-gray-300 dark:text-gray-400 mt-[1px]">
             NethPOT Community
           </span>
         </div>
       </div>
 
-      {/* Orta Menü */}
-      <ul className="flex-1 flex justify-center gap-2 mx-2 flex-wrap navbar-menu-blur" role="menubar" aria-label="Site bölümleri">
-        {navLinks.map(link => {
-          const Icon = link.icon;
-          return (
-            <li key={link.href} role="none">
-              <a
-                href={link.href}
-                className="menu-link menu-link-elevated inline-flex items-center gap-1 px-3 py-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff]"
-                role="menuitem"
-              >
-                <Icon className="opacity-80" />
-                <span className="hidden sm:inline">{link.label}</span>
-              </a>
-            </li>
-          );
-        })}
+      {/* Center Menu */}
+      <ul
+        className="flex-1 flex justify-center gap-2 mx-2 flex-wrap"
+        role="menubar"
+        aria-label="Site bölümleri"
+      >
+        {linkItems}
       </ul>
 
-      {/* Sağ blok */}
+      {/* Right cluster */}
       <div className="flex items-center gap-2">
-        {/* Arama */}
-        <div className="relative w-[160px] sm:w-[220px]">
+        {/* Search */}
+        <div className="relative w-[150px] sm:w-[210px]">
           <FaSearch className="navbar-search-icon" aria-hidden="true" />
-            <input
-              type="text"
-              placeholder="Oyuncu ara..."
-              value={searchValue}
-              onChange={handleSearchChange}
-              className="navbar-search pl-8 navbar-search-elevated"
-              aria-label="Oyuncu ara"
-              spellCheck={false}
-            />
+          <input
+            type="text"
+            placeholder="Oyuncu ara..."
+            value={searchValue}
+            onChange={handleSearchChange}
+            className="navbar-search pl-8"
+            aria-label="Oyuncu ara"
+            spellCheck={false}
+            autoComplete="off"
+            enterKeyHint="search"
+          />
         </div>
 
-        {/* Tema toggle */}
-        {/* <button
+        {/* Theme toggle */}
+        <button
           type="button"
           onClick={toggleTheme}
-          aria-label={`Tema değiştir (Şu an: ${mode === "dark" ? "koyu" : "açık"})`}
-          className="nav-btn-elevated flex items-center justify-center w-10 h-10 rounded-lg text-[#82cfff] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff] transition"
+            aria-label={`Tema değiştir (Şu an: ${mode === "dark" ? "koyu" : "açık"})`}
+          className="login-btn flex items-center justify-center w-10 h-10 p-0 rounded-lg !bg-transparent !text-[#82cfff] hover:!text-white hover:scale-105 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff]"
+          style={{ background: "none" }}
         >
           {mode === "dark" ? <FaSun /> : <FaMoon />}
-        </button> */}
+        </button>
 
         {/* Discord */}
         <a
           href="https://discord.gg/trneth"
           target="_blank"
           rel="noopener noreferrer"
-          className="navbar-link discord-btn flex items-center gap-2 nav-btn-elevated"
+          className="discord-btn flex items-center gap-2"
         >
           <FaDiscord />
           <span className="hidden sm:inline">Discord</span>
@@ -141,14 +182,14 @@ export default function Navbar({ onSearch }) {
         {!user && (
           <>
             <button
-              className="navbar-link login-btn nav-btn-elevated"
+              className="login-btn"
               onClick={() => setShowLogin(true)}
               type="button"
             >
               Giriş Yap
             </button>
             <button
-              className="navbar-link register-btn nav-btn-elevated"
+              className="register-btn"
               onClick={() => setShowRegister(true)}
               type="button"
             >
@@ -160,7 +201,7 @@ export default function Navbar({ onSearch }) {
         {user && <UserMenu user={user} onLogout={logout} />}
       </div>
 
-      {/* Modallar */}
+      {/* Auth Modals */}
       <AuthModal
         show={showLogin}
         onClose={() => setShowLogin(false)}

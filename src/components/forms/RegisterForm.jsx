@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { register as registerAPI } from "../services/api";
+import { register as registerAPI } from "../services/apiClient";
 import AuthInput from "./AuthInput";
 import PasswordField from "./PasswordField";
 import AuthSubmitButton from "./AuthSubmitButton";

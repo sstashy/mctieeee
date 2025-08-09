@@ -14,7 +14,7 @@ import PlayerProfileModal from "../components/modals/PlayerProfileModal";
 import Signature from "../components/common/Signature";
 import ErrorMessage from "../components/common/ErrorMessage";
 import usePlayerSearch from "../components/hooks/usePlayerSearch";
-import { getPlayers } from "../components/services/api";
+import { getPlayers } from "../components/services/apiClient";
 
 // Modlar ve sabit tier listesi
 const modes = ["NethOP"];

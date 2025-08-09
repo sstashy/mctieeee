@@ -1,13 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr" class="no-js">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GALAXY - NETHPOT COMMUNITY</title>
+    <meta charset="utf-8" />
+    <title>Galaxy Tier</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="description" content="Galaxy Tier – Oyuncu sıralamaları ve profilleri." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <!-- Fonts (isteğe bağlı self-host) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet" />
+    <!-- Preload kritik CSS -->
+    <link rel="preload" href="/src/styles/index.css" as="style" />
+    <link rel="stylesheet" href="/src/styles/index.css" />
+    <!-- Tema FOUC fix -->
+    <script>
+      (function() {
+        const pref = localStorage.getItem("theme-pref");
+        const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+        const mode = pref === "light" || (!pref || pref === "system") && prefersLight ? "light" : "dark";
+        if (mode === "light") document.documentElement.classList.add("theme-light");
+        if (mode === "dark") document.documentElement.classList.add("dark");
+        document.documentElement.style.colorScheme = mode;
+        document.documentElement.classList.remove("no-js");
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script type="module">
+      import { reportWebVitals } from './src/perf/webVitals.js';
+      reportWebVitals(console.log);
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
+        });
+      }
+    </script>
   </body>
 </html>

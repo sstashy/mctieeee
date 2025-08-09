@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { getSiteStatus } from "../services/api";
+import { getSiteStatus } from "../services/apiClient";
 
 /**
  * Fazlar: loading | success

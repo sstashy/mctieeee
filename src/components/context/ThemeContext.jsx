@@ -6,110 +6,114 @@ import React, {
   useCallback
 } from "react";
 
-/**
- * Kullanıcı sistem tercihine göre başlangıç teması:
- * localStorage override varsa onu kullan.
- * Tailwind genelde sadece 'dark' class'ını bekliyor; light için ek class gerekmez.
- */
-function resolveInitialTheme() {
-  try {
-    const stored = localStorage.getItem("theme-pref"); // 'dark' | 'light' | 'system'
-    if (stored) {
-      if (stored === "system") return systemTheme();
-      return stored;
-    }
-    return systemTheme();
-  } catch {
-    return "dark";
-  }
+/*
+  Gelişmiş Tema Mantığı:
+  - preference: 'system' | 'light' | 'dark'
+  - mode: efektif ('light' veya 'dark')
+  - HTML'e hem Tailwind dark class'ı hem de değişken bazlı .theme-light uygulanır (isteğe bağlı)
+  - localStorage key: theme-pref
+*/
+
+const STORAGE_KEY = "theme-pref";
+
+function systemPrefersLight() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: light)").matches
+  );
 }
 
-function systemTheme() {
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: light)").matches
-  ) {
-    return "light";
-  }
-  return "dark";
+function resolveInitial() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return { preference: stored, mode: stored };
+    if (stored === "system" || !stored) {
+      const sys = systemPrefersLight() ? "light" : "dark";
+      return { preference: stored || "system", mode: sys };
+    }
+  } catch {}
+  return { preference: "system", mode: systemPrefersLight() ? "light" : "dark" };
 }
 
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [mode, setMode] = useState(() => resolveInitialTheme()); // 'dark' | 'light'
-  const [preference, setPreference] = useState(() => {
-    try {
-      return localStorage.getItem("theme-pref") || "system";
-    } catch {
-      return "system";
-    }
-  }); // 'system' | 'light' | 'dark'
+  const [{ preference, mode }, setThemeState] = useState(resolveInitial);
 
   // DOM apply
   useEffect(() => {
-    // Sadece 'dark' class toggle
     const root = document.documentElement;
+    // Tailwind dark class
     if (mode === "dark") root.classList.add("dark");
     else root.classList.remove("dark");
-
-    // CSS color-scheme yardımı (scrollbar, form controls)
+    // Variable light toggler
+    root.classList.toggle("theme-light", mode === "light");
     root.style.colorScheme = mode;
   }, [mode]);
 
-  // Sistem teması değişirse (preference = system)
+  // Watch system changes if preference === system
   useEffect(() => {
     if (preference !== "system") return;
-    const media = window.matchMedia("(prefers-color-scheme: light)");
-    const handler = () => setMode(systemTheme());
-    media.addEventListener("change", handler);
-    return () => media.removeEventListener("change", handler);
+    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    const handler = () => {
+      setThemeState(s => ({
+        preference: s.preference,
+        mode: systemPrefersLight() ? "light" : "dark"
+      }));
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, [preference]);
 
   // Persist preference
   useEffect(() => {
     try {
-      localStorage.setItem("theme-pref", preference);
+      localStorage.setItem(STORAGE_KEY, preference);
     } catch {}
   }, [preference]);
 
-  // Sekmeler arasında senkronizasyon
+  // Cross-tab sync
   useEffect(() => {
-    const handler = (e) => {
-      if (e.key === "theme-pref") {
-        const newPref = e.newValue || "system";
-        setPreference(newPref);
-        setMode(newPref === "system" ? systemTheme() : newPref);
+    const onStorage = e => {
+      if (e.key === STORAGE_KEY) {
+        const pref = e.newValue || "system";
+        setThemeState({
+          preference: pref,
+            mode:
+              pref === "system"
+                ? systemPrefersLight() ? "light" : "dark"
+                : pref
+        });
       }
     };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const setTheme = useCallback((next) => {
-    // next: 'dark' | 'light' | 'system'
-    setPreference(next);
-    setMode(next === "system" ? systemTheme() : next);
+  const setTheme = useCallback(nextPref => {
+    setThemeState({
+      preference: nextPref,
+      mode:
+        nextPref === "system"
+          ? systemPrefersLight() ? "light" : "dark"
+          : nextPref
+    });
   }, []);
 
   const toggleTheme = useCallback(() => {
-    // kullanıcı manual override yapmış olur
-    setPreference((prev) => {
-      const currentEffective = prev === "system" ? systemTheme() : prev;
-      const nextEffective = currentEffective === "dark" ? "light" : "dark";
-      // system yerine direkt explicit kaydet
-      setMode(nextEffective);
-      return nextEffective;
+    setThemeState(s => {
+      const current = s.mode;
+      const next = current === "dark" ? "light" : "dark";
+      return { preference: next, mode: next };
     });
   }, []);
 
   const value = {
-    mode,            // efektif tema
-    preference,      // kullanıcı seçimi
-    setTheme,        // explicit seçim
-    toggleTheme,     // dark <-> light
-    isDark: mode === "dark"
+    mode,
+    preference,
+    isDark: mode === "dark",
+    setTheme,
+    toggleTheme
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -117,8 +121,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme ThemeProvider içinde kullanılmalı.");
-  }
+  if (!ctx) throw new Error("useTheme ThemeProvider içinde çağrılmalı.");
   return ctx;
 }

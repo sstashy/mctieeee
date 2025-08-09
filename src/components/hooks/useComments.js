@@ -1,20 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getComments, addComment as addCommentApi } from "../services/api";
+import { getComments, addComment as addCommentApi } from "../services/apiClient";
+import { createLRU } from "../../utils/lruCache";
 
-/**
- * useComments
- * - abort & race safe
- * - optimistic comment ekleme
- * - aborted istekler hata göstermiyor
- */
+const commentsCache = createLRU({ max: 200, ttl: 30_000 });
+
 export default function useComments(playerId) {
   const [comments, setComments] = useState([]);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [error, setError] = useState("");
   const abortRef = useRef(null);
-  const seqRef = useRef(0); // race kontrol
+  const seqRef = useRef(0);
 
-  const load = useCallback(() => {
+  const load = useCallback((useCache = true) => {
     if (!playerId) {
       setComments([]);
       setStatus("idle");
@@ -22,43 +19,46 @@ export default function useComments(playerId) {
       return;
     }
 
+    const cached = useCache && commentsCache.get(playerId);
+    if (cached) {
+      setComments(cached);
+      setStatus("success");
+    }
+
     const seq = ++seqRef.current;
-    setStatus("loading");
+    setStatus(cached ? "success" : "loading");
     setError("");
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
     getComments(playerId, { signal: abortRef.current.signal })
       .then(res => {
-        // Sadece en yeni isteğe yanıt uygula
         if (seq !== seqRef.current) return;
-
-        if (res.aborted) {
-            // abort edilmiş -> state dokunma
-            return;
-        }
-
+        if (res.aborted) return;
         if (res.ok) {
+          commentsCache.set(playerId, res.data);
           setComments(res.data);
           setStatus("success");
-          setError("");
         } else {
-          setComments([]);
-          setStatus("error");
-          // Hata mesajı kullanıcıya gösterilmeyecekse boş bırak
-          setError(res.error || ""); // İstersen "" sabit bırak
+          if (!cached) {
+            setStatus("error");
+            setError(res.error || "");
+            setComments([]);
+          }
         }
       })
       .catch(err => {
         if (err.name === "AbortError") return;
         if (seq !== seqRef.current) return;
-        setStatus("error");
-        setError(""); // suppress
+        if (!cached) {
+          setStatus("error");
+          setError("");
+        }
       });
   }, [playerId]);
 
   useEffect(() => {
-    load();
+    load(true);
     return () => abortRef.current?.abort();
   }, [load]);
 
@@ -79,16 +79,16 @@ export default function useComments(playerId) {
 
     const res = await addCommentApi(playerId, userId, username, comment);
     if (res.ok && res.data) {
-      setComments(prev =>
-        prev.map(c =>
-          c._tempKey === tempKey
-            ? { ...res.data, _optimistic: false }
-            : c
-        )
-      );
+      setComments(prev => {
+        const updated = prev.map(c =>
+          c._tempKey === tempKey ? { ...res.data, _optimistic: false } : c
+        );
+        // Cache'e sadece finalize olmuş yorumlar (optimistikler hariç)
+        commentsCache.set(playerId, updated.filter(c => !c._optimistic));
+        return updated;
+      });
       return { ok: true };
     } else {
-      // başarısız -> optimistic sil
       setComments(prev => prev.filter(c => c._tempKey !== tempKey));
       return { ok: false };
     }
@@ -97,8 +97,8 @@ export default function useComments(playerId) {
   return {
     comments,
     status,
-    error,      // UI'de göstermek istemiyorsan kullanma ya da hep "" dön
+    error,
     addComment,
-    reload: load
+    reload: () => load(false)
   };
 }

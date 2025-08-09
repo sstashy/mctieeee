@@ -1,4 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useTransition,
+  useMemo
+} from "react";
 import { useAuth } from "../context/AuthContext";
 import useComments from "../hooks/useComments";
 import useFocusTrap from "../hooks/useFocusTrap";
@@ -6,35 +13,59 @@ import useLockBodyScroll from "../hooks/useLockBodyScroll";
 import ErrorMessage from "../common/ErrorMessage";
 import LoadingSpinner from "../common/LoadingSpinner";
 
+/**
+ * Config
+ */
 const MAX_LEN = 500;
+const VIRTUAL_THRESHOLD = 60;
 
-export default function CommentsModal({ playerId, playerName, onClose }) {
+export default function CommentsModal({
+  playerId,
+  playerName,
+  onClose,
+  autoFocus = true
+}) {
   const { user } = useAuth();
   const {
     comments,
     status,
     error,
-    addComment,     // hook içindeki (optimistic destekleyen) wrapper
+    addComment,
     reload
   } = useComments(playerId);
 
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [announce, setAnnounce] = useState("");
+  const [isPending, startTransition] = useTransition();
+
   const panelRef = useRef(null);
   const listRef = useRef(null);
+  const textareaRef = useRef(null);
 
-  useFocusTrap(panelRef, true);
-  useLockBodyScroll(true);
+  const open = !!playerId;
 
-  // ESC
+  useFocusTrap(panelRef, open && autoFocus);
+  useLockBodyScroll(open);
+
+  // Esc close
   useEffect(() => {
+    if (!open) return;
     const esc = e => { if (e.key === "Escape") onClose?.(); };
-    document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
-  }, [onClose]);
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [open, onClose]);
 
-  // aria-live mesajını temizle
+  // Auto focus textarea on show (optional)
+  useEffect(() => {
+    if (open && autoFocus) {
+      requestAnimationFrame(() => {
+        textareaRef.current?.focus();
+      });
+    }
+  }, [open, autoFocus]);
+
+  // aria-live cleanup
   useEffect(() => {
     if (!announce) return;
     const t = setTimeout(() => setAnnounce(""), 2500);
@@ -42,16 +73,14 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
   }, [announce]);
 
   const remaining = MAX_LEN - text.length;
-  const disabled = !playerId || sending;
+  const disableSend = !playerId || sending || !text.trim();
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    if (!playerId || !user) return;
-    if (!text.trim() || sending) return;
+    if (disableSend || !user) return;
     setSending(true);
 
-    // addComment hook’unu optimistic ekleme ile kullanıyorsan sadece (user, text) şekline adapte ettin mi?
-    // Eğer hook’un imzası orijinal API ile aynıysa:
+    // Optimistic veya normal sonuç
     const res = await addComment({
       playerId,
       userId: user.id,
@@ -64,17 +93,25 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
     if (res.ok) {
       setText("");
       setAnnounce("Yorum eklendi.");
-      listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-      // Eğer hook içinde optimistic güncelleme yoksa manuel:
-      // reload();
+      // Liste üstte yeni geleni gösteriyorsa scroll etmeye gerek yok;
+      // eğer ekleme listenin altına append ediliyorsa:
+      // listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       setAnnounce(res.error || "Yorum gönderilemedi.");
     }
-  }, [playerId, user, text, sending, addComment]);
+  }, [disableSend, user, addComment, playerId, text]);
 
-  if (!playerId) {
-    return null; // veya fallback modal
-  }
+  // Büyük liste için virtualization (hafif custom)
+  const useVirtual = comments.length >= VIRTUAL_THRESHOLD;
+
+  const virtualItems = useMemo(() => {
+    if (!useVirtual) return comments;
+    // Çok basit windowing (ilk 200 ms'de baseline). Gerekirse tanstack/react-virtual ile değiştir.
+    // Burada minimal basitlik: sadece ilk 400 öğe + ilerde lazy load kancası.
+    return comments.slice(0, 400);
+  }, [useVirtual, comments]);
+
+  if (!open) return null;
 
   return (
     <div
@@ -86,7 +123,7 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
     >
       <div
         ref={panelRef}
-        className="relative w-full max-w-md rounded-2xl border border-[#28304a] bg-[#23263af2] shadow-2xl px-6 py-8 flex flex-col focus:outline-none"
+        className="relative w-full max-w-md rounded-2xl border border-[#28304a] bg-[#23263af2] shadow-xl px-6 py-7 flex flex-col focus:outline-none transition-transform animate-slide-down"
       >
         <button
           type="button"
@@ -104,18 +141,20 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
           {playerName} – Yorumlar
         </h2>
 
-        {error && false && (
-          <ErrorMessage
-            message={error}
-            variant="error"
-            dismissible
-            onClose={() => reload()}
-          />
+        {error && (
+          <div className="mb-3">
+            <ErrorMessage
+              message={error}
+              variant="error"
+              dismissible
+              onClose={() => startTransition(() => reload())}
+            />
+          </div>
         )}
 
         <div
           ref={listRef}
-          className="flex-1 overflow-y-auto pr-1 space-y-3 mb-4 max-h-64 scrollbar-thin"
+            className="flex-1 overflow-y-auto pr-1 space-y-3 mb-4 max-h-64 custom-scrollbar-container"
           aria-live="polite"
         >
           {status === "loading" && (
@@ -124,7 +163,7 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
             </div>
           )}
 
-            {status === "success" && comments.length === 0 && (
+          {status === "success" && comments.length === 0 && (
             <div className="text-gray-400 text-center text-sm italic py-4">
               Henüz yorum yok. İlk yorumu sen yaz!
             </div>
@@ -132,13 +171,14 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
 
           {status === "success" && comments.length > 0 && (
             <ul className="space-y-3" role="list">
-              {comments.map(c => (
+              {virtualItems.map(c => (
                 <li
                   key={c.id || c._tempKey}
                   className={`rounded border border-gray-700/60 bg-[#1e2534] px-3 py-2 text-sm flex flex-col relative ${
                     c._optimistic ? "opacity-70" : "opacity-100"
                   }`}
                   role="listitem"
+                  style={{ willChange: c._optimistic ? "opacity" : "auto" }}
                 >
                   <span className="font-semibold text-blue-400">
                     {c.username || "Anonim"}
@@ -156,6 +196,11 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
                   )}
                 </li>
               ))}
+              {useVirtual && comments.length > virtualItems.length && (
+                <li className="text-center text-[11px] text-gray-500 py-1">
+                  + {comments.length - virtualItems.length} daha (sanallaştırıldı)
+                </li>
+              )}
             </ul>
           )}
         </div>
@@ -164,14 +209,16 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
           <form onSubmit={handleSubmit} className="mt-auto">
             <div className="relative">
               <textarea
+                ref={textareaRef}
                 value={text}
                 onChange={e => {
-                  if (e.target.value.length <= MAX_LEN) setText(e.target.value);
+                  const v = e.target.value;
+                  if (v.length <= MAX_LEN) setText(v);
                 }}
                 placeholder="Yorumun..."
                 className="w-full min-h-[70px] rounded-lg border border-gray-700 bg-[#1d2230] px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                 maxLength={MAX_LEN}
-                disabled={disabled}
+                disabled={sending}
                 aria-label="Yorum metni"
               />
               <span
@@ -184,10 +231,10 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
             </div>
             <button
               type="submit"
-              disabled={disabled || !text.trim()}
+              disabled={disableSend}
               className="mt-2 w-full rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
             >
-              {sending ? "Gönderiliyor..." : "Gönder"}
+              {sending ? "Gönderiliyor..." : isPending ? "Güncelleniyor..." : "Gönder"}
             </button>
             <div className="sr-only" aria-live="assertive">
               {announce}
@@ -203,8 +250,9 @@ export default function CommentsModal({ playerId, playerName, onClose }) {
   );
 }
 
-function formatDate(iso) {
-  if (!iso) return "";
-  // Eğer backend "2024-08-08 12:30:22" şeklinde dönüyorsa new Date() UTC/MS farkı olabilir
-  return iso.replace("T", " ").slice(0, 16);
+function formatDate(value) {
+  if (!value) return "";
+  // ISO veya "2025-08-09 21:12:00"
+  if (value.includes("T")) return value.replace("T", " ").slice(0, 16);
+  return value.slice(0, 16);
 }

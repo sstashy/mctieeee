@@ -1,25 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
-import { login as loginAPI } from "../services/api";
+import { login as loginAPI } from "../services/apiClient";
 import AuthInput from "./AuthInput";
 import PasswordField from "./PasswordField";
 import AuthSubmitButton from "./AuthSubmitButton";
 import ErrorMessage from "../common/ErrorMessage";
 
-/**
- * LoginForm
- * Yeni API client login() dönüşü:
- * {
- *   ok: boolean,
- *   status: number,
- *   token: string|null,
- *   user: { id?, username } | null,
- *   error: string|null
- * }
- */
 export default function LoginForm({ onSuccess, onError }) {
   const { login } = useAuth();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -27,15 +15,13 @@ export default function LoginForm({ onSuccess, onError }) {
   const [loading, setLoading] = useState(false);
   const abortRef = useRef(null);
 
-  // Input değişince global error temizle
+  // Alan değişince global error temizle
   useEffect(() => {
     if (globalError) setGlobalError("");
   }, [username, password, globalError]);
 
-  // Unmount'ta isteği iptal
-  useEffect(() => {
-    return () => abortRef.current?.abort();
-  }, []);
+  // Unmount iptal
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const validate = useCallback(() => {
     const errs = {};
@@ -52,8 +38,6 @@ export default function LoginForm({ onSuccess, onError }) {
 
     setLoading(true);
     setGlobalError("");
-
-    // Önceki isteği iptal et
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
@@ -61,17 +45,13 @@ export default function LoginForm({ onSuccess, onError }) {
       const res = await loginAPI(username.trim(), password, {
         signal: abortRef.current.signal
       });
-
       if (res.ok) {
-        // Auth context'e user + token ilet
         login({
           username: res.user?.username || username.trim(),
-            id: res.user?.id,
+          id: res.user?.id,
           token: res.token,
           loggedAt: Date.now()
         });
-
-        // Formu sıfırla
         setUsername("");
         setPassword("");
         onSuccess?.(res);
@@ -95,7 +75,7 @@ export default function LoginForm({ onSuccess, onError }) {
       aria-label="Giriş Formu"
       noValidate
     >
-      <h2 className="text-3xl font-extrabold text-[#5ea4ff] text-center tracking-wider mb-2 drop-shadow-lg">
+      <h2 className="text-3xl font-extrabold text-[#5ea4ff] text-center tracking-wider mb-2">
         Giriş Yap
       </h2>
 
@@ -128,10 +108,7 @@ export default function LoginForm({ onSuccess, onError }) {
         />
       )}
 
-      <AuthSubmitButton
-        loading={loading}
-        loadingText="Giriş yapılıyor..."
-      >
+      <AuthSubmitButton loading={loading} loadingText="Giriş yapılıyor...">
         Giriş Yap
       </AuthSubmitButton>
     </form>
