@@ -1,13 +1,13 @@
-import React from "react";
-import clsx from "clsx";
+import React from 'react';
+import clsx from 'clsx';
 
 export default function AuthSubmitButton({
   loading,
   children,
-  className = "",
+  className = '',
   loadingText,
   disabled,
-  icon = true
+  icon = true,
 }) {
   return (
     <button
@@ -15,12 +15,12 @@ export default function AuthSubmitButton({
       disabled={loading || disabled}
       aria-busy={loading || undefined}
       className={clsx(
-        "relative bg-gradient-to-r from-[#5ea4ff] via-[#82cfff] to-[#5ea4ff]",
-        "text-white font-bold px-6 py-3 rounded-xl shadow-lg border border-[#82cfff]",
-        "flex items-center justify-center gap-2 transition-all duration-200",
-        "hover:from-[#82cfff] hover:to-[#5ea4ff] hover:text-[#23263a] hover:scale-[1.03]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff] disabled:opacity-60 disabled:cursor-not-allowed",
-        className
+        'relative bg-gradient-to-r from-[#5ea4ff] via-[#82cfff] to-[#5ea4ff]',
+        'text-white font-bold px-6 py-3 rounded-xl shadow-lg border border-[#82cfff]',
+        'flex items-center justify-center gap-2 transition-all duration-200',
+        'hover:from-[#82cfff] hover:to-[#5ea4ff] hover:text-[#23263a] hover:scale-[1.03]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff] disabled:opacity-60 disabled:cursor-not-allowed',
+        className,
       )}
     >
       {loading && (
@@ -42,7 +42,7 @@ export default function AuthSubmitButton({
         </svg>
       )}
       <span className="font-semibold tracking-wide">
-        {loading ? loadingText || "İşleniyor..." : children}
+        {loading ? loadingText || 'İşleniyor...' : children}
       </span>
     </button>
   );

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 /**
  * Basit focus trap: container içindeki odaklanabilir elemanlar arasında tab döngüsü.
@@ -10,30 +10,33 @@ export default function useFocusTrap(ref, active) {
     if (!root) return;
 
     const selector = [
-      "a[href]",
-      "button:not([disabled])",
-      "textarea:not([disabled])",
-      "input:not([disabled])",
-      "select:not([disabled])",
-      "[tabindex]:not([tabindex='-1'])"
-    ].join(",");
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      "[tabindex]:not([tabindex='-1'])",
+    ].join(',');
 
     const getFocusable = () =>
-      Array.from(root.querySelectorAll(selector))
-        .filter(el => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"));
+      Array.from(root.querySelectorAll(selector)).filter(
+        (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'),
+      );
 
     // İlk odak
     const focusables = getFocusable();
     if (focusables.length) {
       // İlk form elemanını veya butonu seç
-      const firstInput = focusables.find(el => ["INPUT","BUTTON","TEXTAREA","SELECT"].includes(el.tagName));
+      const firstInput = focusables.find((el) =>
+        ['INPUT', 'BUTTON', 'TEXTAREA', 'SELECT'].includes(el.tagName),
+      );
       (firstInput || focusables[0]).focus();
     } else {
       root.focus();
     }
 
     function handleKey(e) {
-      if (e.key !== "Tab") return;
+      if (e.key !== 'Tab') return;
       const items = getFocusable();
       if (!items.length) return;
       const idx = items.indexOf(document.activeElement);
@@ -49,7 +52,7 @@ export default function useFocusTrap(ref, active) {
       }
     }
 
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, [ref, active]);
 }

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 // Tek bir boş referans (yeniden yaratma yok)
 const EMPTY = Object.freeze([]);
@@ -7,11 +7,11 @@ const EMPTY = Object.freeze([]);
  * Accent / diakritik temizleme
  */
 function normalize(str) {
-  if (typeof str !== "string") return "";
+  if (typeof str !== 'string') return '';
   return str
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
     .trim();
 }
 
@@ -22,12 +22,12 @@ function buildIndex(players, fields) {
   const idx = new Array(players.length);
   for (let i = 0; i < players.length; i++) {
     const p = players[i];
-    let hay = "";
+    let hay = '';
     for (let j = 0; j < fields.length; j++) {
       const f = fields[j];
       const v = p && p[f];
       if (v) {
-        hay += " " + normalize(String(v));
+        hay += ' ' + normalize(String(v));
       }
     }
     idx[i] = { ref: p, haystack: hay };
@@ -44,31 +44,28 @@ export default function usePlayerSearch(
   {
     minLength = 0,
     returnAllIfEmpty = true,
-    fields = ["name"],
+    fields = ['name'],
     fuzzy = false,
     limit = Infinity,
-    index = true
-  } = {}
+    index = true,
+  } = {},
 ) {
   // Defansif normalizasyon
   const safePlayers = Array.isArray(players) ? players : EMPTY;
-  const safeFields = Array.isArray(fields) && fields.length > 0 ? fields : ["name"];
-  const term = normalize(search || "");
+  const safeFields = Array.isArray(fields) && fields.length > 0 ? fields : ['name'];
+  const term = normalize(search || '');
 
   // limit sayısal değilse Infinity
-  const hardLimit =
-    typeof limit === "number" && limit > 0 ? limit : Infinity;
+  const hardLimit = typeof limit === 'number' && limit > 0 ? limit : Infinity;
 
   // Index (players referansı değişirse yeniden)
   const indexed = useMemo(() => {
     if (safePlayers.length === 0) return EMPTY;
     if (!index) {
       // inline index
-      return safePlayers.map(p => ({
+      return safePlayers.map((p) => ({
         ref: p,
-        haystack: safeFields
-          .map(f => normalize(p && p[f] ? String(p[f]) : ""))
-          .join(" ")
+        haystack: safeFields.map((f) => normalize(p && p[f] ? String(p[f]) : '')).join(' '),
       }));
     }
     return buildIndex(safePlayers, safeFields);
@@ -78,11 +75,11 @@ export default function usePlayerSearch(
   const results = useMemo(() => {
     // Boş index
     if (!indexed || indexed.length === 0) {
-      return returnAllIfEmpty && term === "" ? safePlayers : EMPTY;
+      return returnAllIfEmpty && term === '' ? safePlayers : EMPTY;
     }
 
     // Arama terimi boş
-    if (term === "") {
+    if (term === '') {
       return returnAllIfEmpty ? safePlayers : EMPTY;
     }
 
@@ -119,15 +116,7 @@ export default function usePlayerSearch(
     }
 
     return out.length ? out : EMPTY;
-  }, [
-    indexed,
-    term,
-    minLength,
-    returnAllIfEmpty,
-    fuzzy,
-    hardLimit,
-    safePlayers
-  ]);
+  }, [indexed, term, minLength, returnAllIfEmpty, fuzzy, hardLimit, safePlayers]);
 
   return results;
-} 
+}

@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect } from 'react';
 
 export default function useLockBodyScroll(active) {
   useLayoutEffect(() => {
@@ -8,7 +8,7 @@ export default function useLockBodyScroll(active) {
     if (scrollBarWidth > 0) {
       document.body.style.paddingRight = `${scrollBarWidth}px`;
     }
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = overflow;
       document.body.style.paddingRight = paddingRight;

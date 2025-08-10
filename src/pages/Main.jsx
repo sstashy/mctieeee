@@ -1,29 +1,22 @@
 // src/pages/Main.jsx
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
-  useDeferredValue
-} from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback, useDeferredValue } from 'react';
 
-import Navbar from "../components/menus/Navbar";
-import TierList from "../components/lists/TierList";
-import PlayerProfileModal from "../components/modals/PlayerProfileModal";
-import Signature from "../components/common/Signature";
-import ErrorMessage from "../components/common/ErrorMessage";
-import usePlayerSearch from "../components/hooks/usePlayerSearch";
-import { getPlayers } from "../components/services/apiClient";
+import Navbar from '../components/menus/Navbar';
+import TierList from '../components/lists/TierList';
+import PlayerProfileModal from '../components/modals/PlayerProfileModal';
+import Signature from '../components/common/Signature';
+import ErrorMessage from '../components/common/ErrorMessage';
+import usePlayerSearch from '../components/hooks/usePlayerSearch';
+import { getPlayers } from '../components/services/apiClient';
 
 // Modlar ve sabit tier listesi
-const modes = ["NethOP"];
+const modes = ['NethOP'];
 const fixedTiers = [
-  { key: "Tier 1", number: "1" },
-  { key: "Tier 2", number: "2" },
-  { key: "Tier 3", number: "3" },
-  { key: "Tier 4", number: "4" },
-  { key: "Tier 5", number: "5" },
+  { key: 'Tier 1', number: '1' },
+  { key: 'Tier 2', number: '2' },
+  { key: 'Tier 3', number: '3' },
+  { key: 'Tier 4', number: '4' },
+  { key: 'Tier 5', number: '5' },
 ];
 
 // Basit skeleton component
@@ -44,12 +37,12 @@ function TierSkeleton() {
 function usePlayersByMode(mode) {
   const [rawPlayers, setRawPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState('');
   const abortRef = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    setErrorMsg("");
+    setErrorMsg('');
 
     // Önceki isteği iptal
     abortRef.current?.abort();
@@ -58,12 +51,12 @@ function usePlayersByMode(mode) {
     const res = await getPlayers(mode, {
       signal: abortRef.current.signal,
       // wrapper üzerinde abortPrevious = true varsa oradan da iptal olur
-      force: true
+      force: true,
     });
 
     if (res.aborted) return;
     if (!res.ok) {
-      setErrorMsg(res.error || "Veri alınırken hata oluştu.");
+      setErrorMsg(res.error || 'Veri alınırken hata oluştu.');
       setRawPlayers([]);
       setLoading(false);
       return;
@@ -79,22 +72,22 @@ function usePlayersByMode(mode) {
       // Bu branch pek gerekli değil ama emniyet için:
       Object.entries(payload).forEach(([tierKey, arr]) => {
         if (Array.isArray(arr)) {
-          arr.forEach(p => flat.push({ ...p, tier: tierKey }));
+          arr.forEach((p) => flat.push({ ...p, tier: tierKey }));
         }
       });
     } else if (payload?.tiers && Array.isArray(payload.tiers)) {
-      payload.tiers.forEach(group => {
+      payload.tiers.forEach((group) => {
         if (Array.isArray(group.players)) {
-          group.players.forEach(p => {
+          group.players.forEach((p) => {
             flat.push({ ...p, tier: String(group.tier) });
           });
         }
       });
-    } else if (payload && typeof payload === "object") {
+    } else if (payload && typeof payload === 'object') {
       // Eski associative: {"1":[...], "2":[...]}
       Object.entries(payload).forEach(([tierKey, arr]) => {
         if (Array.isArray(arr)) {
-          arr.forEach(p => flat.push({ ...p, tier: tierKey }));
+          arr.forEach((p) => flat.push({ ...p, tier: tierKey }));
         }
       });
     }
@@ -114,7 +107,7 @@ function usePlayersByMode(mode) {
 export default function Main() {
   const [activeMode, setActiveMode] = useState(modes[0]);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const { rawPlayers, loading, errorMsg, reload } = usePlayersByMode(activeMode);
 
@@ -146,8 +139,8 @@ export default function Main() {
       // Önce HT, sonra diğer
       for (const pass of [true, false]) {
         for (const p of all) {
-          const isHT = p.tierType === "HT";
-            if (isHT !== pass) continue;
+          const isHT = p.tierType === 'HT';
+          if (isHT !== pass) continue;
           if (!seen.has(p.name)) {
             seen.add(p.name);
             uniq.push(p);
@@ -158,23 +151,23 @@ export default function Main() {
       return {
         tier: key,
         players: uniq,
-        idx
+        idx,
       };
     });
   }, [tierMap]);
 
   const handlePlayerClick = useCallback(
     (player, tier) => setSelectedPlayer({ ...player, tier }),
-    []
+    [],
   );
 
   const handleModeChange = (mode) => {
     if (mode === activeMode) return;
     setActiveMode(mode);
-    setSearch("");
+    setSearch('');
   };
 
-  const hasAnyResult = filteredTierLists.some(t => t.players.length > 0);
+  const hasAnyResult = filteredTierLists.some((t) => t.players.length > 0);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#181c2a] to-[#23263a] flex flex-col">
@@ -193,12 +186,7 @@ export default function Main() {
         <section className="relative w-full mt-6">
           {errorMsg && (
             <div className="mb-4">
-              <ErrorMessage
-                message={errorMsg}
-                variant="error"
-                dismissible
-                onClose={reload}
-              />
+              <ErrorMessage message={errorMsg} variant="error" dismissible onClose={reload} />
             </div>
           )}
 
@@ -208,7 +196,7 @@ export default function Main() {
             style={{ minHeight: 390 }}
           >
             {loading
-              ? fixedTiers.map(t => <TierSkeleton key={t.key} />)
+              ? fixedTiers.map((t) => <TierSkeleton key={t.key} />)
               : filteredTierLists.map(({ tier, players, idx }) => (
                   <TierList
                     key={tier}
@@ -222,16 +210,11 @@ export default function Main() {
           </div>
 
           {!loading && !errorMsg && search && !hasAnyResult && (
-            <div className="text-center text-sm text-gray-400 mt-4">
-              Arama sonucu bulunamadı.
-            </div>
+            <div className="text-center text-sm text-gray-400 mt-4">Arama sonucu bulunamadı.</div>
           )}
         </section>
 
-        <PlayerProfileModal
-          player={selectedPlayer}
-          onClose={() => setSelectedPlayer(null)}
-        />
+        <PlayerProfileModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />
       </main>
       <Signature />
     </div>
@@ -240,8 +223,8 @@ export default function Main() {
 
 /* ---------- Helpers ---------- */
 function normalizeTier(tierValue) {
-  if (tierValue == null) return "";
+  if (tierValue == null) return '';
   const raw = String(tierValue).toLowerCase();
   // Örn: "Tier 1" -> "1"
-  return raw.replace("tier", "").trim();
+  return raw.replace('tier', '').trim();
 }

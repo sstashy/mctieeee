@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 export default function useIdleCallback(cb, deps = [], { timeout = 2000 } = {}) {
   useEffect(() => {
     let id;
-    if ("requestIdleCallback" in window) {
+    if ('requestIdleCallback' in window) {
       id = window.requestIdleCallback(cb, { timeout });
       return () => window.cancelIdleCallback(id);
     }

@@ -11,19 +11,19 @@ import {
   APP_VERSION,
   BUILD_HASH,
   API_EXPECTED_VERSION,
-  FALLBACK_ROTATE_AFTER_SEC
-} from "./licenseConfig";
+  FALLBACK_ROTATE_AFTER_SEC,
+} from './licenseConfig';
 
 // Normal API tabanı (oyuncular vb.)
 const DEFAULT_TIMEOUT = 12000;
-const API_BASE = (import.meta.env.VITE_API_BASE || "https://api.sstashy.io").replace(/\/+$/, "");
+const API_BASE = (import.meta.env.VITE_API_BASE || 'https://api.sstashy.io').replace(/\/+$/, '');
 
 const suppressUserErrors = true;
-const userError = (msg) => suppressUserErrors ? null : (msg || null);
+const userError = (msg) => (suppressUserErrors ? null : msg || null);
 
 // ---- Dahili Durum ----
-let authToken = null;         // Kullanıcı oturum token (login)
-let shortToken = null;        // Lisans kısa token
+let authToken = null; // Kullanıcı oturum token (login)
+let shortToken = null; // Lisans kısa token
 let licenseId = STATIC_LICENSE_ID || null;
 let tokenExpiresAt = 0;
 let rotateAfterSec = 0;
@@ -42,21 +42,32 @@ let onKillCallback = null;
 let onLicenseChange = null;
 
 // ---------- Utils ----------
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-const tryParseJson = (t) => { if (!t) return null; try { return JSON.parse(t); } catch { return { raw: t }; } };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const tryParseJson = (t) => {
+  if (!t) return null;
+  try {
+    return JSON.parse(t);
+  } catch {
+    return { raw: t };
+  }
+};
 const nowSec = () => Math.floor(Date.now() / 1000);
 
 function computeFingerprint() {
   const ua = navigator.userAgent.slice(0, 40);
-  const src = window.location.hostname + "|" + BUILD_HASH + "|" + ua;
+  const src = window.location.hostname + '|' + BUILD_HASH + '|' + ua;
   let h = 0;
   for (let i = 0; i < src.length; i++) h = (h * 31 + src.charCodeAt(i)) >>> 0;
   return h.toString(16);
 }
 
 // ---------- Dış erişim ----------
-export function setAuthToken(token) { authToken = token || null; }
-export function clearAuthToken() { authToken = null; }
+export function setAuthToken(token) {
+  authToken = token || null;
+}
+export function clearAuthToken() {
+  authToken = null;
+}
 
 export function getLicenseInfo() {
   return {
@@ -64,20 +75,28 @@ export function getLicenseInfo() {
     features: [...features],
     kill: killFlag,
     valid: !!shortToken && !globalKilled && !killFlag,
-    expiresAt: tokenExpiresAt
+    expiresAt: tokenExpiresAt,
   };
 }
-export function setOnKill(cb) { onKillCallback = cb; }
-export function setOnLicenseChange(cb) { onLicenseChange = cb; }
-export function hasFeature(flag) { return features.includes(flag); }
+export function setOnKill(cb) {
+  onKillCallback = cb;
+}
+export function setOnLicenseChange(cb) {
+  onLicenseChange = cb;
+}
+export function hasFeature(flag) {
+  return features.includes(flag);
+}
 
 // ---------- Kill ----------
-function markKilled(reason = "killed") {
+function markKilled(reason = 'killed') {
   if (globalKilled) return;
   globalKilled = true;
-  console.warn("[apiClient] Global kill:", reason);
+  console.warn('[apiClient] Global kill:', reason);
   if (onKillCallback) {
-    try { onKillCallback(reason); } catch {}
+    try {
+      onKillCallback(reason);
+    } catch {}
   } else {
     document.body.innerHTML = `
       <div style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f1117;color:#f87171;text-align:center;padding:24px">
@@ -106,7 +125,7 @@ export async function apiBoot({ force = false, providedLicenseId } = {}) {
     licenseId = providedLicenseId;
   }
   if (!licenseId) {
-    console.warn("[apiClient] licenseId yok; STATIC_LICENSE_ID veya parametre ile ver.");
+    console.warn('[apiClient] licenseId yok; STATIC_LICENSE_ID veya parametre ile ver.');
   }
 
   const fp = computeFingerprint();
@@ -114,21 +133,21 @@ export async function apiBoot({ force = false, providedLicenseId } = {}) {
     domain: window.location.hostname,
     appVersion: APP_VERSION,
     buildHash: BUILD_HASH,
-    fingerprint: fp
+    fingerprint: fp,
   };
   if (licenseId) body.licenseId = licenseId;
 
   try {
     const res = await rawFetchAbsolute(LICENSE_HANDSHAKE_URL, {
-      method: "POST",
+      method: 'POST',
       body,
       timeout: 10000,
-      ignoreAuth: true
+      ignoreAuth: true,
     });
 
     if (!res.ok) {
       if (res.status === 403 || res.status === 410) {
-        markKilled(res.error?.code || res.error?.message || "revoked");
+        markKilled(res.error?.code || res.error?.message || 'revoked');
       }
       return false;
     }
@@ -143,18 +162,26 @@ export async function apiBoot({ force = false, providedLicenseId } = {}) {
     killFlag = !!d.kill;
 
     if (killFlag) {
-      markKilled("server_kill_flag");
+      markKilled('server_kill_flag');
       return false;
     }
     if (d.apiVersion && d.apiVersion !== API_EXPECTED_VERSION) {
-      console.warn("[apiClient] apiVersion mismatch server=", d.apiVersion, " expected=", API_EXPECTED_VERSION);
+      console.warn(
+        '[apiClient] apiVersion mismatch server=',
+        d.apiVersion,
+        ' expected=',
+        API_EXPECTED_VERSION,
+      );
     }
 
     scheduleRotation();
-    if (onLicenseChange) try { onLicenseChange(getLicenseInfo()); } catch {}
+    if (onLicenseChange)
+      try {
+        onLicenseChange(getLicenseInfo());
+      } catch {}
     return true;
   } catch (e) {
-    console.error("[apiClient] Handshake error:", e);
+    console.error('[apiClient] Handshake error:', e);
     return false;
   }
 }
@@ -169,13 +196,13 @@ async function rotateToken() {
       return;
     }
     const res = await rawFetchAbsolute(LICENSE_REFRESH_URL, {
-      method: "POST",
+      method: 'POST',
       body: { licenseId },
-      timeout: 9000
+      timeout: 9000,
     });
     if (!res.ok) {
       if (res.status === 403 || res.status === 410) {
-        markKilled(res.error?.code || "revoked");
+        markKilled(res.error?.code || 'revoked');
       }
       return;
     }
@@ -186,14 +213,17 @@ async function rotateToken() {
     features = Array.isArray(d.features) ? d.features : features;
     killFlag = !!d.kill;
     if (killFlag) {
-      markKilled("server_kill_flag");
+      markKilled('server_kill_flag');
       return;
     }
     scheduleRotation();
-    if (onLicenseChange) try { onLicenseChange(getLicenseInfo()); } catch {}
+    if (onLicenseChange)
+      try {
+        onLicenseChange(getLicenseInfo());
+      } catch {}
   } catch (e) {
-    console.warn("[apiClient] rotateToken err:", e.message);
-    setTimeout(() => rotateToken().catch(()=>{}), 8000);
+    console.warn('[apiClient] rotateToken err:', e.message);
+    setTimeout(() => rotateToken().catch(() => {}), 8000);
   } finally {
     rotating = false;
   }
@@ -204,36 +234,33 @@ function scheduleRotation() {
   const now = nowSec();
   const ttl = tokenExpiresAt - now;
   if (ttl <= 0) {
-    rotateToken().catch(()=>{});
+    rotateToken().catch(() => {});
     return;
   }
   // rotation süresi: expires - 15sn veya rotateAfterSec
   const rotateIn = Math.max(10, Math.min(ttl - 15, rotateAfterSec || Math.floor(ttl / 2)));
   setTimeout(() => {
-    rotateToken().catch(()=>{});
+    rotateToken().catch(() => {});
   }, rotateIn * 1000);
 }
 
 // ---------- Düşük Seviye Fetch (ABSOLUTE) ----------
-async function rawFetchAbsolute(url, {
-  method = "GET",
-  body,
-  headers = {},
-  timeout = DEFAULT_TIMEOUT,
-  ignoreAuth = false
-} = {}) {
+async function rawFetchAbsolute(
+  url,
+  { method = 'GET', body, headers = {}, timeout = DEFAULT_TIMEOUT, ignoreAuth = false } = {},
+) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
 
   const finalHeaders = {
-    "Accept": "application/json, text/plain, */*",
-    ...(body ? { "Content-Type": "application/json" } : {}),
-    ...(licenseId ? { "X-License-ID": licenseId } : {}),
-    "X-Client-Version": APP_VERSION,
-    "X-Client-Fingerprint": computeFingerprint(),
-    ...(shortToken && !ignoreAuth ? { "Authorization": `Bearer ${shortToken}` } : {}),
-    ...(authToken ? { "X-User-Auth": `Bearer ${authToken}` } : {}),
-    ...headers
+    Accept: 'application/json, text/plain, */*',
+    ...(body ? { 'Content-Type': 'application/json' } : {}),
+    ...(licenseId ? { 'X-License-ID': licenseId } : {}),
+    'X-Client-Version': APP_VERSION,
+    'X-Client-Fingerprint': computeFingerprint(),
+    ...(shortToken && !ignoreAuth ? { Authorization: `Bearer ${shortToken}` } : {}),
+    ...(authToken ? { 'X-User-Auth': `Bearer ${authToken}` } : {}),
+    ...headers,
   };
 
   try {
@@ -242,34 +269,39 @@ async function rawFetchAbsolute(url, {
       headers: finalHeaders,
       body: body ? JSON.stringify(body) : undefined,
       signal: ctrl.signal,
-      cache: "no-store"
+      cache: 'no-store',
     });
 
-    let rawText = "";
+    let rawText = '';
     let data = null;
     try {
       rawText = await res.text();
       if (rawText) data = tryParseJson(rawText);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
 
     if (!res.ok) {
       const code = data?.error?.code || data?.error || data?.code;
-      if (res.status === 403 && (code === "revoked" || code === "license_revoked")) {
-        markKilled("revoked");
-      } else if (res.status === 410 && (code === "killed" || code === "license_killed")) {
-        markKilled("killed");
+      if (res.status === 403 && (code === 'revoked' || code === 'license_revoked')) {
+        markKilled('revoked');
+      } else if (res.status === 410 && (code === 'killed' || code === 'license_killed')) {
+        markKilled('killed');
       }
       return {
         ok: false,
         status: res.status,
         data,
-        error: { message: data?.message || data?.error || `HTTP_${res.status}`, code }
+        error: { message: data?.message || data?.error || `HTTP_${res.status}`, code },
       };
     }
 
-    if (data && typeof data === "object" &&
-        Object.prototype.hasOwnProperty.call(data, "ok") &&
-        Object.prototype.hasOwnProperty.call(data, "data")) {
+    if (
+      data &&
+      typeof data === 'object' &&
+      Object.prototype.hasOwnProperty.call(data, 'ok') &&
+      Object.prototype.hasOwnProperty.call(data, 'data')
+    ) {
       data = data.data;
     }
 
@@ -279,7 +311,7 @@ async function rawFetchAbsolute(url, {
       ok: false,
       status: 0,
       data: null,
-      error: { message: e.name === "AbortError" ? "ABORTED" : e.message || "NETWORK" }
+      error: { message: e.name === 'AbortError' ? 'ABORTED' : e.message || 'NETWORK' },
     };
   } finally {
     clearTimeout(timer);
@@ -287,7 +319,7 @@ async function rawFetchAbsolute(url, {
 }
 
 async function rawFetch(path, opts = {}) {
-  const url = path.startsWith("http") ? path : API_BASE + path;
+  const url = path.startsWith('http') ? path : API_BASE + path;
   return rawFetchAbsolute(url, opts);
 }
 
@@ -304,10 +336,10 @@ export async function ensureLicenseBoot({ licenseId: lic } = {}) {
 }
 
 export async function login(username, password, opts = {}) {
-  const res = await request("/auth/login.php", {
-    method: "POST",
+  const res = await request('/auth/login.php', {
+    method: 'POST',
     body: { username, password },
-    ...opts
+    ...opts,
   });
   if (res.ok && res.data?.token) setAuthToken(res.data.token);
   return {
@@ -315,15 +347,15 @@ export async function login(username, password, opts = {}) {
     status: res.status,
     data: res.data,
     token: res.data?.token || null,
-    error: userError(res.ok ? null : (res.error?.message))
+    error: userError(res.ok ? null : res.error?.message),
   };
 }
 
 export async function register(username, password, opts = {}) {
-  const res = await request("/auth/register.php", {
-    method: "POST",
+  const res = await request('/auth/register.php', {
+    method: 'POST',
     body: { username, password },
-    ...opts
+    ...opts,
   });
   if (res.ok && res.data?.token) setAuthToken(res.data.token);
   return {
@@ -331,17 +363,16 @@ export async function register(username, password, opts = {}) {
     status: res.status,
     data: res.data,
     token: res.data?.token || null,
-    error: userError(res.ok ? null : (res.error?.message))
+    error: userError(res.ok ? null : res.error?.message),
   };
 }
 
 // ---------- Players (cache) ----------
-export async function getPlayers(mode, {
-  force = false,
-  cacheTtl = PLAYERS_TTL_MS,
-  abortPrevious = true
-} = {}) {
-  const key = String(mode || "default");
+export async function getPlayers(
+  mode,
+  { force = false, cacheTtl = PLAYERS_TTL_MS, abortPrevious = true } = {},
+) {
+  const key = String(mode || 'default');
   const cached = playersCache.get(key);
   const now = Date.now();
   if (!force && cached && now - cached.timestamp < cacheTtl) {
@@ -351,7 +382,7 @@ export async function getPlayers(mode, {
   lastPlayersController = new AbortController();
 
   const res = await request(`/api.php?route=tiers&mode=${encodeURIComponent(mode)}`, {
-    signal: lastPlayersController.signal
+    signal: lastPlayersController.signal,
   });
   if (res.ok) playersCache.set(key, { timestamp: now, data: res.data });
   return { ...res, cached: false };
@@ -362,7 +393,7 @@ export function clearPlayersCache(mode) {
   else playersCache.clear();
 }
 export function prefetchPlayers(mode) {
-  getPlayers(mode, { force: true, abortPrevious: false }).catch(()=>{});
+  getPlayers(mode, { force: true, abortPrevious: false }).catch(() => {});
 }
 
 // ---------- Comments ----------
@@ -372,12 +403,12 @@ export async function getComments(playerId) {
   }
   const res = await request(`/api.php?route=comments&player_id=${encodeURIComponent(playerId)}`);
   if (!res.ok) {
-    if (res.error?.message === "ABORTED") {
+    if (res.error?.message === 'ABORTED') {
       return { ok: false, status: 0, data: [], error: null, aborted: true };
     }
     return { ok: false, status: res.status, data: [], error: userError(null) };
   }
-  const arr = Array.isArray(res.data) ? res.data : (res.data?.comments || []);
+  const arr = Array.isArray(res.data) ? res.data : res.data?.comments || [];
   return { ok: true, status: res.status, data: arr, error: null };
 }
 
@@ -385,9 +416,9 @@ export async function addComment(playerId, userId, username, comment) {
   if (!comment || !comment.trim()) {
     return { ok: false, status: 0, data: null, error: userError(null) };
   }
-  const res = await request("/api.php?route=add-comment", {
-    method: "POST",
-    body: { player_id: playerId, user_id: userId, username, comment: comment.trim() }
+  const res = await request('/api.php?route=add-comment', {
+    method: 'POST',
+    body: { player_id: playerId, user_id: userId, username, comment: comment.trim() },
   });
   if (!res.ok) {
     return { ok: false, status: res.status, data: null, error: userError(null) };
@@ -397,25 +428,25 @@ export async function addComment(playerId, userId, username, comment) {
 }
 
 // ---------- Site Status ----------
-const STATUS_URL = import.meta.env.DEV
-  ? "/_status/site-status.php"
-  : API_BASE + "/site-status.php";
+const STATUS_URL = import.meta.env.DEV ? '/_status/site-status.php' : API_BASE + '/site-status.php';
 
 export async function getSiteStatus({ signal } = {}) {
-  const qs = "_=" + Date.now();
+  const qs = '_=' + Date.now();
   try {
-    const res = await fetch(STATUS_URL + "?" + qs, {
-      cache: "no-store",
+    const res = await fetch(STATUS_URL + '?' + qs, {
+      cache: 'no-store',
       signal,
       headers: {
-        "Accept": "application/json",
-        "Cache-Control": "no-store, no-cache, must-revalidate",
-        "Pragma": "no-cache"
-      }
+        Accept: 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        Pragma: 'no-cache',
+      },
     });
     const text = await res.text();
     let parsed = null;
-    try { parsed = JSON.parse(text); } catch {}
+    try {
+      parsed = JSON.parse(text);
+    } catch {}
     if (!res.ok) {
       return { ok: false, status: res.status, data: null, raw: text };
     }

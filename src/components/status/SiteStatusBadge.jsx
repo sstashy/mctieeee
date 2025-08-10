@@ -1,14 +1,7 @@
-import React from "react";
+import React from 'react';
 
-export default function SiteStatusBadge({
-  data,
-  phase,
-  isLoading,
-  isRefreshing,
-  isError,
-  reload
-}) {
-  if ((!data && (phase === "loading" || phase === "idle")) || isLoading) return null;
+export default function SiteStatusBadge({ data, phase, isLoading, isRefreshing, isError, reload }) {
+  if ((!data && (phase === 'loading' || phase === 'idle')) || isLoading) return null;
 
   if (isError) {
     return (
@@ -24,11 +17,11 @@ export default function SiteStatusBadge({
   return (
     <div
       className={`inline-flex items-center gap-2 rounded-md px-3 py-1 text-xs ${
-        active ? "bg-emerald-500/15 text-emerald-300" : "bg-yellow-500/15 text-yellow-300"
+        active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-yellow-500/15 text-yellow-300'
       }`}
     >
       <span>
-        {data?.message || (active ? "Site aktif" : "Bakım")}
+        {data?.message || (active ? 'Site aktif' : 'Bakım')}
         {isRefreshing && <span className="animate-pulse">…</span>}
       </span>
     </div>

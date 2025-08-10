@@ -1,12 +1,7 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback
-} from "react";
-import { createPortal } from "react-dom";
-import useFocusTrap from "../hooks/useFocusTrap";
-import useLockBodyScroll from "../hooks/useLockBodyScroll";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import useFocusTrap from '../hooks/useFocusTrap';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
 
 const ANIM_MS = 220;
 
@@ -18,11 +13,11 @@ export default function AuthModal({
   show,
   onClose,
   children,
-  title = "Kimlik",
+  title = 'Kimlik',
   description,
   labelledById,
   closeOnBackdrop = true,
-  closeOnEsc = true
+  closeOnEsc = true,
 }) {
   const [mounted, setMounted] = useState(show);
   const [animating, setAnimating] = useState(false);
@@ -45,10 +40,10 @@ export default function AuthModal({
   useEffect(() => {
     if (!show || !closeOnEsc) return;
     const handle = (e) => {
-      if (e.key === "Escape") onClose?.();
+      if (e.key === 'Escape') onClose?.();
     };
-    window.addEventListener("keydown", handle);
-    return () => window.removeEventListener("keydown", handle);
+    window.addEventListener('keydown', handle);
+    return () => window.removeEventListener('keydown', handle);
   }, [show, closeOnEsc, onClose]);
 
   // Focus + scroll lock
@@ -60,16 +55,13 @@ export default function AuthModal({
       if (!closeOnBackdrop) return;
       if (e.target === backdropRef.current) onClose?.();
     },
-    [closeOnBackdrop, onClose]
+    [closeOnBackdrop, onClose],
   );
 
   if (!mounted) return null;
 
-  const headingId =
-    labelledById || `auth-modal-title-${Math.random().toString(36).slice(2)}`;
-  const descId = description
-    ? `auth-modal-desc-${Math.random().toString(36).slice(2)}`
-    : undefined;
+  const headingId = labelledById || `auth-modal-title-${Math.random().toString(36).slice(2)}`;
+  const descId = description ? `auth-modal-desc-${Math.random().toString(36).slice(2)}` : undefined;
 
   return createPortal(
     <div
@@ -77,7 +69,7 @@ export default function AuthModal({
       onMouseDown={handleBackdrop}
       className={`fixed inset-0 z-[100] flex items-start justify-center px-4 pt-24 pb-10
         bg-[#0b1020cc] backdrop-blur-sm transition-opacity
-        ${animating ? "opacity-100" : "opacity-0"}`}
+        ${animating ? 'opacity-100' : 'opacity-0'}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby={headingId}
@@ -88,7 +80,7 @@ export default function AuthModal({
         className={`relative w-full max-w-lg rounded-2xl border border-[#28304a] shadow-xl
         bg-gradient-to-br from-[#23263a] via-[#28304a] to-[#181c2a]
         px-8 py-9 focus:outline-none transition-transform transition-opacity duration-200
-        ${animating ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+        ${animating ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
       >
         <button
           type="button"
@@ -108,10 +100,7 @@ export default function AuthModal({
           </svg>
         </button>
         <header className="mb-5">
-          <h2
-            id={headingId}
-            className="text-2xl font-bold text-[#5ea4ff] tracking-wide"
-          >
+          <h2 id={headingId} className="text-2xl font-bold text-[#5ea4ff] tracking-wide">
             {title}
           </h2>
           {description && (
@@ -123,6 +112,6 @@ export default function AuthModal({
         <div className="modal-body">{children}</div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

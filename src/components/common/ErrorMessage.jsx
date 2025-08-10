@@ -1,6 +1,6 @@
-import React from "react";
-import PropTypes from "prop-types";
-import clsx from "clsx";
+import React from 'react';
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
 
 /**
  * Varyant bazlı mesaj bileşeni.
@@ -9,55 +9,53 @@ import clsx from "clsx";
  */
 
 const VARIANT_STYLES = {
-  error: "bg-red-950/60 border border-red-600 text-red-300",
-  warning: "bg-amber-950/60 border border-amber-500 text-amber-300",
-  info: "bg-sky-950/60 border border-sky-600 text-sky-300",
-  success: "bg-emerald-950/60 border border-emerald-600 text-emerald-300"
+  error: 'bg-red-950/60 border border-red-600 text-red-300',
+  warning: 'bg-amber-950/60 border border-amber-500 text-amber-300',
+  info: 'bg-sky-950/60 border border-sky-600 text-sky-300',
+  success: 'bg-emerald-950/60 border border-emerald-600 text-emerald-300',
 };
 
 export default function ErrorMessage({
   message,
   children,
-  variant = "error",
+  variant = 'error',
   dismissible = false,
   onClose,
-  className = "",
+  className = '',
   live = true,
   icon = true,
-  testId
+  testId,
 }) {
   const content = children || message;
   if (!content) return null;
 
-  const role = variant === "error" ? "alert" : "status";
-  const ariaLive = live ? (variant === "error" ? "assertive" : "polite") : undefined;
+  const role = variant === 'error' ? 'alert' : 'status';
+  const ariaLive = live ? (variant === 'error' ? 'assertive' : 'polite') : undefined;
 
   return (
     <div
       role={role}
       aria-live={ariaLive}
       className={clsx(
-        "relative flex gap-2 items-start rounded-md px-3 py-2 text-sm font-medium",
+        'relative flex gap-2 items-start rounded-md px-3 py-2 text-sm font-medium',
         VARIANT_STYLES[variant],
-        className
+        className,
       )}
       data-testid={testId || `message-${variant}`}
     >
       {icon && (
         <span className="mt-[2px]" aria-hidden="true">
-          {variant === "error" && <ErrorIcon />}
-          {variant === "warning" && <WarnIcon />}
-          {variant === "info" && <InfoIcon />}
-          {variant === "success" && <SuccessIcon />}
+          {variant === 'error' && <ErrorIcon />}
+          {variant === 'warning' && <WarnIcon />}
+          {variant === 'info' && <InfoIcon />}
+          {variant === 'success' && <SuccessIcon />}
         </span>
       )}
-      <div className="min-w-0 flex-1 leading-snug break-words">
-        {content}
-      </div>
+      <div className="min-w-0 flex-1 leading-snug break-words">{content}</div>
       {dismissible && (
         <button
           type="button"
-            aria-label="Kapat"
+          aria-label="Kapat"
           onClick={onClose}
           className="ml-2 p-1 rounded hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-black focus-visible:ring-red-400 transition"
         >
@@ -71,13 +69,13 @@ export default function ErrorMessage({
 ErrorMessage.propTypes = {
   message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   children: PropTypes.node,
-  variant: PropTypes.oneOf(["error", "warning", "info", "success"]),
+  variant: PropTypes.oneOf(['error', 'warning', 'info', 'success']),
   dismissible: PropTypes.bool,
   onClose: PropTypes.func,
   className: PropTypes.string,
   live: PropTypes.bool,
   icon: PropTypes.bool,
-  testId: PropTypes.string
+  testId: PropTypes.string,
 };
 
 /* Basit inline ikonlar */

@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { register as registerAPI } from "../services/apiClient";
-import AuthInput from "./AuthInput";
-import PasswordField from "./PasswordField";
-import AuthSubmitButton from "./AuthSubmitButton";
-import ErrorMessage from "../common/ErrorMessage";
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { register as registerAPI } from '../services/apiClient';
+import AuthInput from './AuthInput';
+import PasswordField from './PasswordField';
+import AuthSubmitButton from './AuthSubmitButton';
+import ErrorMessage from '../common/ErrorMessage';
 
 /**
  * RegisterForm
@@ -17,15 +17,15 @@ import ErrorMessage from "../common/ErrorMessage";
  * }
  */
 export default function RegisterForm({ onSuccess, onError }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [globalError, setGlobalError] = useState("");
+  const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
   const abortRef = useRef(null);
 
   useEffect(() => {
-    if (globalError) setGlobalError("");
+    if (globalError) setGlobalError('');
   }, [username, password, globalError]);
 
   useEffect(() => {
@@ -36,10 +36,10 @@ export default function RegisterForm({ onSuccess, onError }) {
     const errs = {};
     const u = username.trim();
 
-    if (!u) errs.username = "Kullanıcı adı gerekli.";
-    else if (/\s/.test(u)) errs.username = "Boşluk içeremez.";
-    else if (!/^[A-Za-z0-9_]{3,32}$/.test(u)) errs.username = "3-32 (harf, rakam, altçizgi)";
-    if (password.length < 8) errs.password = "En az 8 karakter.";
+    if (!u) errs.username = 'Kullanıcı adı gerekli.';
+    else if (/\s/.test(u)) errs.username = 'Boşluk içeremez.';
+    else if (!/^[A-Za-z0-9_]{3,32}$/.test(u)) errs.username = '3-32 (harf, rakam, altçizgi)';
+    if (password.length < 8) errs.password = 'En az 8 karakter.';
 
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -51,28 +51,28 @@ export default function RegisterForm({ onSuccess, onError }) {
     if (!validate()) return;
 
     setLoading(true);
-    setGlobalError("");
+    setGlobalError('');
 
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
     try {
       const res = await registerAPI(username.trim(), password, {
-        signal: abortRef.current.signal
+        signal: abortRef.current.signal,
       });
 
       if (res.ok) {
         // Başarılı kayıt (token dönmedi ise sadece success kabul)
-        setUsername("");
-        setPassword("");
+        setUsername('');
+        setPassword('');
         onSuccess?.(res);
       } else {
-        setGlobalError(res.error || "Kayıt başarısız.");
+        setGlobalError(res.error || 'Kayıt başarısız.');
         onError?.(res);
       }
     } catch (err) {
-      if (err.name === "AbortError") return;
-      setGlobalError("Sunucuya erişilemiyor.");
+      if (err.name === 'AbortError') return;
+      setGlobalError('Sunucuya erişilemiyor.');
       onError?.(err);
     } finally {
       setLoading(false);
@@ -96,7 +96,7 @@ export default function RegisterForm({ onSuccess, onError }) {
         autoComplete="username"
         placeholder="Kullanıcı Adı"
         value={username}
-        onChange={e => setUsername(e.target.value)}
+        onChange={(e) => setUsername(e.target.value)}
         error={fieldErrors.username}
         maxLength={32}
       />
@@ -105,7 +105,7 @@ export default function RegisterForm({ onSuccess, onError }) {
         id="register-password"
         label="Şifre"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         autoComplete="new-password"
         error={fieldErrors.password}
         minLength={8}
@@ -116,14 +116,11 @@ export default function RegisterForm({ onSuccess, onError }) {
           message={globalError}
           variant="error"
           dismissible
-          onClose={() => setGlobalError("")}
+          onClose={() => setGlobalError('')}
         />
       )}
 
-      <AuthSubmitButton
-        loading={loading}
-        loadingText="Kaydediliyor..."
-      >
+      <AuthSubmitButton loading={loading} loadingText="Kaydediliyor...">
         Kayıt Ol
       </AuthSubmitButton>
     </form>

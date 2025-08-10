@@ -1,17 +1,10 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useTransition,
-  useMemo
-} from "react";
-import { useAuth } from "../context/AuthContext";
-import useComments from "../hooks/useComments";
-import useFocusTrap from "../hooks/useFocusTrap";
-import useLockBodyScroll from "../hooks/useLockBodyScroll";
-import ErrorMessage from "../common/ErrorMessage";
-import LoadingSpinner from "../common/LoadingSpinner";
+import React, { useEffect, useRef, useState, useCallback, useTransition, useMemo } from 'react';
+import { useAuth } from '../context/AuthContext';
+import useComments from '../hooks/useComments';
+import useFocusTrap from '../hooks/useFocusTrap';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
+import ErrorMessage from '../common/ErrorMessage';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 /**
  * Config
@@ -19,24 +12,13 @@ import LoadingSpinner from "../common/LoadingSpinner";
 const MAX_LEN = 500;
 const VIRTUAL_THRESHOLD = 60;
 
-export default function CommentsModal({
-  playerId,
-  playerName,
-  onClose,
-  autoFocus = true
-}) {
+export default function CommentsModal({ playerId, playerName, onClose, autoFocus = true }) {
   const { user } = useAuth();
-  const {
-    comments,
-    status,
-    error,
-    addComment,
-    reload
-  } = useComments(playerId);
+  const { comments, status, error, addComment, reload } = useComments(playerId);
 
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const [announce, setAnnounce] = useState("");
+  const [announce, setAnnounce] = useState('');
   const [isPending, startTransition] = useTransition();
 
   const panelRef = useRef(null);
@@ -51,9 +33,11 @@ export default function CommentsModal({
   // Esc close
   useEffect(() => {
     if (!open) return;
-    const esc = e => { if (e.key === "Escape") onClose?.(); };
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
+    const esc = (e) => {
+      if (e.key === 'Escape') onClose?.();
+    };
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
   }, [open, onClose]);
 
   // Auto focus textarea on show (optional)
@@ -68,38 +52,41 @@ export default function CommentsModal({
   // aria-live cleanup
   useEffect(() => {
     if (!announce) return;
-    const t = setTimeout(() => setAnnounce(""), 2500);
+    const t = setTimeout(() => setAnnounce(''), 2500);
     return () => clearTimeout(t);
   }, [announce]);
 
   const remaining = MAX_LEN - text.length;
   const disableSend = !playerId || sending || !text.trim();
 
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    if (disableSend || !user) return;
-    setSending(true);
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (disableSend || !user) return;
+      setSending(true);
 
-    // Optimistic veya normal sonuç
-    const res = await addComment({
-      playerId,
-      userId: user.id,
-      username: user.username,
-      comment: text.trim()
-    });
+      // Optimistic veya normal sonuç
+      const res = await addComment({
+        playerId,
+        userId: user.id,
+        username: user.username,
+        comment: text.trim(),
+      });
 
-    setSending(false);
+      setSending(false);
 
-    if (res.ok) {
-      setText("");
-      setAnnounce("Yorum eklendi.");
-      // Liste üstte yeni geleni gösteriyorsa scroll etmeye gerek yok;
-      // eğer ekleme listenin altına append ediliyorsa:
-      // listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      setAnnounce(res.error || "Yorum gönderilemedi.");
-    }
-  }, [disableSend, user, addComment, playerId, text]);
+      if (res.ok) {
+        setText('');
+        setAnnounce('Yorum eklendi.');
+        // Liste üstte yeni geleni gösteriyorsa scroll etmeye gerek yok;
+        // eğer ekleme listenin altına append ediliyorsa:
+        // listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        setAnnounce(res.error || 'Yorum gönderilemedi.');
+      }
+    },
+    [disableSend, user, addComment, playerId, text],
+  );
 
   // Büyük liste için virtualization (hafif custom)
   const useVirtual = comments.length >= VIRTUAL_THRESHOLD;
@@ -119,7 +106,9 @@ export default function CommentsModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="comments-heading"
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
     >
       <div
         ref={panelRef}
@@ -134,10 +123,7 @@ export default function CommentsModal({
           &times;
         </button>
 
-        <h2
-          id="comments-heading"
-          className="text-lg font-bold text-blue-300 tracking-wide mb-3"
-        >
+        <h2 id="comments-heading" className="text-lg font-bold text-blue-300 tracking-wide mb-3">
           {playerName} – Yorumlar
         </h2>
 
@@ -154,41 +140,35 @@ export default function CommentsModal({
 
         <div
           ref={listRef}
-            className="flex-1 overflow-y-auto pr-1 space-y-3 mb-4 max-h-64 custom-scrollbar-container"
+          className="flex-1 overflow-y-auto pr-1 space-y-3 mb-4 max-h-64 custom-scrollbar-container"
           aria-live="polite"
         >
-          {status === "loading" && (
+          {status === 'loading' && (
             <div className="py-6 flex justify-center">
               <LoadingSpinner inline size="sm" text="Yorumlar yükleniyor..." />
             </div>
           )}
 
-          {status === "success" && comments.length === 0 && (
+          {status === 'success' && comments.length === 0 && (
             <div className="text-gray-400 text-center text-sm italic py-4">
               Henüz yorum yok. İlk yorumu sen yaz!
             </div>
           )}
 
-          {status === "success" && comments.length > 0 && (
+          {status === 'success' && comments.length > 0 && (
             <ul className="space-y-3" role="list">
-              {virtualItems.map(c => (
+              {virtualItems.map((c) => (
                 <li
                   key={c.id || c._tempKey}
                   className={`rounded border border-gray-700/60 bg-[#1e2534] px-3 py-2 text-sm flex flex-col relative ${
-                    c._optimistic ? "opacity-70" : "opacity-100"
+                    c._optimistic ? 'opacity-70' : 'opacity-100'
                   }`}
                   role="listitem"
-                  style={{ willChange: c._optimistic ? "opacity" : "auto" }}
+                  style={{ willChange: c._optimistic ? 'opacity' : 'auto' }}
                 >
-                  <span className="font-semibold text-blue-400">
-                    {c.username || "Anonim"}
-                  </span>
-                  <span className="text-gray-200 mt-1 break-words">
-                    {c.comment}
-                  </span>
-                  <span className="text-[11px] text-gray-500 mt-1">
-                    {formatDate(c.created_at)}
-                  </span>
+                  <span className="font-semibold text-blue-400">{c.username || 'Anonim'}</span>
+                  <span className="text-gray-200 mt-1 break-words">{c.comment}</span>
+                  <span className="text-[11px] text-gray-500 mt-1">{formatDate(c.created_at)}</span>
                   {c._optimistic && (
                     <span className="absolute top-1.5 right-2 text-[10px] text-amber-300">
                       gönderiliyor...
@@ -211,7 +191,7 @@ export default function CommentsModal({
               <textarea
                 ref={textareaRef}
                 value={text}
-                onChange={e => {
+                onChange={(e) => {
                   const v = e.target.value;
                   if (v.length <= MAX_LEN) setText(v);
                 }}
@@ -223,7 +203,7 @@ export default function CommentsModal({
               />
               <span
                 className={`absolute bottom-1 right-2 text-[11px] ${
-                  remaining < 40 ? "text-amber-300" : "text-gray-500"
+                  remaining < 40 ? 'text-amber-300' : 'text-gray-500'
                 }`}
               >
                 {remaining}
@@ -234,7 +214,7 @@ export default function CommentsModal({
               disabled={disableSend}
               className="mt-2 w-full rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
             >
-              {sending ? "Gönderiliyor..." : isPending ? "Güncelleniyor..." : "Gönder"}
+              {sending ? 'Gönderiliyor...' : isPending ? 'Güncelleniyor...' : 'Gönder'}
             </button>
             <div className="sr-only" aria-live="assertive">
               {announce}
@@ -251,8 +231,8 @@ export default function CommentsModal({
 }
 
 function formatDate(value) {
-  if (!value) return "";
+  if (!value) return '';
   // ISO veya "2025-08-09 21:12:00"
-  if (value.includes("T")) return value.replace("T", " ").slice(0, 16);
+  if (value.includes('T')) return value.replace('T', ' ').slice(0, 16);
   return value.slice(0, 16);
 }
