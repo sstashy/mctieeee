@@ -1,23 +1,23 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useAuth } from "../context/AuthContext";
-import { login as loginAPI } from "../services/apiClient";
-import AuthInput from "./AuthInput";
-import PasswordField from "./PasswordField";
-import AuthSubmitButton from "./AuthSubmitButton";
-import ErrorMessage from "../common/ErrorMessage";
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { login as loginAPI } from '../services/apiClient';
+import AuthInput from './AuthInput';
+import PasswordField from './PasswordField';
+import AuthSubmitButton from './AuthSubmitButton';
+import ErrorMessage from '../common/ErrorMessage';
 
 export default function LoginForm({ onSuccess, onError }) {
   const { login } = useAuth();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [globalError, setGlobalError] = useState("");
+  const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
   const abortRef = useRef(null);
 
   // Alan değişince global error temizle
   useEffect(() => {
-    if (globalError) setGlobalError("");
+    if (globalError) setGlobalError('');
   }, [username, password, globalError]);
 
   // Unmount iptal
@@ -25,8 +25,8 @@ export default function LoginForm({ onSuccess, onError }) {
 
   const validate = useCallback(() => {
     const errs = {};
-    if (!username.trim()) errs.username = "Kullanıcı adı gerekli.";
-    if (!password) errs.password = "Şifre gerekli.";
+    if (!username.trim()) errs.username = 'Kullanıcı adı gerekli.';
+    if (!password) errs.password = 'Şifre gerekli.';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }, [username, password]);
@@ -37,31 +37,31 @@ export default function LoginForm({ onSuccess, onError }) {
     if (!validate()) return;
 
     setLoading(true);
-    setGlobalError("");
+    setGlobalError('');
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
     try {
       const res = await loginAPI(username.trim(), password, {
-        signal: abortRef.current.signal
+        signal: abortRef.current.signal,
       });
       if (res.ok) {
         login({
           username: res.user?.username || username.trim(),
           id: res.user?.id,
           token: res.token,
-          loggedAt: Date.now()
+          loggedAt: Date.now(),
         });
-        setUsername("");
-        setPassword("");
+        setUsername('');
+        setPassword('');
         onSuccess?.(res);
       } else {
-        setGlobalError(res.error || "Giriş başarısız.");
+        setGlobalError(res.error || 'Giriş başarısız.');
         onError?.(res);
       }
     } catch (err) {
-      if (err.name === "AbortError") return;
-      setGlobalError("Sunucuya ulaşılamıyor.");
+      if (err.name === 'AbortError') return;
+      setGlobalError('Sunucuya ulaşılamıyor.');
       onError?.(err);
     } finally {
       setLoading(false);
@@ -85,7 +85,7 @@ export default function LoginForm({ onSuccess, onError }) {
         autoComplete="username"
         placeholder="Kullanıcı Adı"
         value={username}
-        onChange={e => setUsername(e.target.value)}
+        onChange={(e) => setUsername(e.target.value)}
         error={fieldErrors.username}
         maxLength={32}
       />
@@ -94,7 +94,7 @@ export default function LoginForm({ onSuccess, onError }) {
         id="login-password"
         label="Şifre"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
         autoComplete="current-password"
         error={fieldErrors.password}
       />
@@ -104,7 +104,7 @@ export default function LoginForm({ onSuccess, onError }) {
           message={globalError}
           variant="error"
           dismissible
-          onClose={() => setGlobalError("")}
+          onClose={() => setGlobalError('')}
         />
       )}
 

@@ -1,18 +1,11 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useRef
-} from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Basit doğrulama – user objesinde en azından id veya name olduğundan emin ol.
  */
 function normalizeUser(raw) {
   if (!raw) return null;
-  if (typeof raw !== "object") return null;
+  if (typeof raw !== 'object') return null;
   if (!raw.name && !raw.username) return null;
   return raw;
 }
@@ -37,10 +30,10 @@ const safeStorage = {
     try {
       window.localStorage.removeItem(key);
     } catch {}
-  }
+  },
 };
 
-const STORAGE_KEY = "user";
+const STORAGE_KEY = 'user';
 
 const AuthContext = createContext(null);
 
@@ -89,8 +82,8 @@ export function AuthProvider({ children }) {
         }
       }
     }
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   // (Opsiyonel) token süresi yaklaşınca silent refresh – kullanıcı objesinde exp varsa:
@@ -116,7 +109,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (userData) => {
     // userData = { name, token, exp? ... }
     const normalized = normalizeUser(userData);
-    if (!normalized) throw new Error("Geçersiz kullanıcı verisi");
+    if (!normalized) throw new Error('Geçersiz kullanıcı verisi');
     setUser(normalized);
     return normalized;
   }, []);
@@ -133,7 +126,7 @@ export function AuthProvider({ children }) {
     isAuthenticated,
     initializing,
     login,
-    logout
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -142,7 +135,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error("useAuth AuthProvider içinde kullanılmalı.");
+    throw new Error('useAuth AuthProvider içinde kullanılmalı.');
   }
   return ctx;
 }

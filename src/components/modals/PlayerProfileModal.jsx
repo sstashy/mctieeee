@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import PropTypes from "prop-types";
-import useFocusTrap from "../hooks/useFocusTrap";
-import useLockBodyScroll from "../hooks/useLockBodyScroll";
-import { useAuth } from "../context/AuthContext";
-import CommentsModal from "./CommentsModal";
+import React, { useState, useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import useFocusTrap from '../hooks/useFocusTrap';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
+import { useAuth } from '../context/AuthContext';
+import CommentsModal from './CommentsModal';
 
 export default function PlayerProfileModal({ player, onClose }) {
   const panelRef = useRef(null);
@@ -18,13 +18,13 @@ export default function PlayerProfileModal({ player, onClose }) {
   useEffect(() => {
     if (!open) return;
     const esc = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         if (showComments) setShowComments(false);
         else onClose?.();
       }
     };
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
   }, [open, showComments, onClose]);
 
   if (!open) return null;
@@ -80,18 +80,16 @@ export default function PlayerProfileModal({ player, onClose }) {
               </span>
             )}
           </div>
-          <div className="text-lg font-semibold text-gray-100 mb-3">
-            {player.name}
-          </div>
+          <div className="text-lg font-semibold text-gray-100 mb-3">{player.name}</div>
 
           <InfoRow label="Tier">
             <span className="bg-gray-800 px-2 rounded text-gray-200 font-mono">
-              {player.tier ?? "Bilinmiyor"}
+              {player.tier ?? 'Bilinmiyor'}
             </span>
           </InfoRow>
 
           <InfoRow label="Tür">
-            {player.tierType === "HT" ? (
+            {player.tierType === 'HT' ? (
               <span className="text-green-400 font-bold">HT</span>
             ) : (
               <span className="text-red-400 font-bold">LT</span>
@@ -99,9 +97,7 @@ export default function PlayerProfileModal({ player, onClose }) {
           </InfoRow>
 
           <InfoRow label="Test Tarihi">
-            <span className="text-gray-100 font-mono">
-              {player.lastTested || "—"}
-            </span>
+            <span className="text-gray-100 font-mono">{player.lastTested || '—'}</span>
           </InfoRow>
 
           <div className="flex gap-3 mt-4 justify-center">
@@ -142,9 +138,9 @@ PlayerProfileModal.propTypes = {
     name: PropTypes.string.isRequired,
     tier: PropTypes.string,
     tierType: PropTypes.string,
-    lastTested: PropTypes.string
+    lastTested: PropTypes.string,
   }),
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 };
 
 function InfoRow({ label, children }) {
@@ -158,5 +154,5 @@ function InfoRow({ label, children }) {
 
 InfoRow.propTypes = {
   label: PropTypes.string.isRequired,
-  children: PropTypes.node
+  children: PropTypes.node,
 };

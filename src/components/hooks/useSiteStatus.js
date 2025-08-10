@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { getSiteStatus } from "../services/apiClient";
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { getSiteStatus } from '../services/apiClient';
 
 /**
  * Fazlar: loading | success
@@ -8,9 +8,9 @@ import { getSiteStatus } from "../services/apiClient";
 export default function useSiteStatus({
   failOpenAfterMs = 1200,
   refreshInterval = 0,
-  debug = true
+  debug = true,
 } = {}) {
-  const [phase, setPhase] = useState("loading");
+  const [phase, setPhase] = useState('loading');
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -21,7 +21,7 @@ export default function useSiteStatus({
   const fetchIdRef = useRef(0); // artan kimlik
   const latestAppliedIdRef = useRef(-1);
 
-  const log = (...a) => debug && console.log("[useSiteStatus]", ...a);
+  const log = (...a) => debug && console.log('[useSiteStatus]', ...a);
 
   const clearTimer = (k) => {
     if (timersRef.current[k]) {
@@ -35,26 +35,26 @@ export default function useSiteStatus({
 
   const applySuccess = (id, payload, source) => {
     if (id < latestAppliedIdRef.current) {
-      log("skip stale success (id)", id, "latest", latestAppliedIdRef.current, source);
+      log('skip stale success (id)', id, 'latest', latestAppliedIdRef.current, source);
       return;
     }
     latestAppliedIdRef.current = id;
     setData(payload);
     setError(null);
-    setPhase("success");
-    log("success applied id", id, source, payload);
+    setPhase('success');
+    log('success applied id', id, source, payload);
   };
 
   const fetchOnce = useCallback(async () => {
     if (runningRef.current) {
-      log("fetch skipped (running)");
+      log('fetch skipped (running)');
       return;
     }
     runningRef.current = true;
 
     const fetchId = ++fetchIdRef.current;
-    log("FETCH start id=", fetchId);
-    setPhase(p => (p === "success" ? "success" : "loading"));
+    log('FETCH start id=', fetchId);
+    setPhase((p) => (p === 'success' ? 'success' : 'loading'));
     setError(null);
 
     // Abort önceki
@@ -65,67 +65,76 @@ export default function useSiteStatus({
     try {
       const res = await getSiteStatus({ signal });
 
-      log("FETCH result id=", fetchId, res);
+      log('FETCH result id=', fetchId, res);
       if (signal.aborted) {
-        log("FETCH aborted after settle id=", fetchId);
+        log('FETCH aborted after settle id=', fetchId);
         return;
       }
 
       if (res.ok && res.data) {
-        clearTimer("failOpen");
-        applySuccess(fetchId, res.data, "network");
+        clearTimer('failOpen');
+        applySuccess(fetchId, res.data, 'network');
       } else {
-        log("FETCH not ok id=", fetchId);
+        log('FETCH not ok id=', fetchId);
         if (!data) {
           // fail-open bekle
-          setError("status-failed");
+          setError('status-failed');
         } else {
-          applySuccess(fetchId, data, "retain-cache");
+          applySuccess(fetchId, data, 'retain-cache');
         }
       }
     } catch (e) {
       if (signal.aborted) {
-        log("FETCH AbortError id=", fetchId);
+        log('FETCH AbortError id=', fetchId);
       } else {
-        log("FETCH exception id=", fetchId, e);
-        if (!data) setError("exception");
+        log('FETCH exception id=', fetchId, e);
+        if (!data) setError('exception');
       }
     } finally {
       if (runningRef.current) runningRef.current = false;
-      log("FETCH finally id=", fetchId);
+      log('FETCH finally id=', fetchId);
     }
   }, [data]);
 
   // İlk mount + fail-open + opsiyonel polling
   useEffect(() => {
-    log("MOUNT (StrictMode safe)");
+    log('MOUNT (StrictMode safe)');
     runningRef.current = false; // ikinci mount reset
     fetchOnce();
 
     if (failOpenAfterMs > 0) {
-      clearTimer("failOpen");
+      clearTimer('failOpen');
       const scheduledId = fetchIdRef.current;
       timersRef.current.failOpen = setTimeout(() => {
-        log("FAIL-OPEN timer fire scheduledId=", scheduledId, "latestApplied=", latestAppliedIdRef.current, "phase=", phase, "data=", data);
+        log(
+          'FAIL-OPEN timer fire scheduledId=',
+          scheduledId,
+          'latestApplied=',
+          latestAppliedIdRef.current,
+          'phase=',
+          phase,
+          'data=',
+          data,
+        );
         // Henüz success uygulanmadıysa ve hiçbir fetch success'e ulaşmadıysa fail-open uygula
-        if (latestAppliedIdRef.current < scheduledId && phase !== "success" && !data) {
-            applySuccess(scheduledId, { active: true, message: "assumed-up" }, "fail-open");
+        if (latestAppliedIdRef.current < scheduledId && phase !== 'success' && !data) {
+          applySuccess(scheduledId, { active: true, message: 'assumed-up' }, 'fail-open');
         } else {
-          log("FAIL-OPEN skip (already resolved or newer fetch)");
+          log('FAIL-OPEN skip (already resolved or newer fetch)');
         }
       }, failOpenAfterMs);
     }
 
     if (refreshInterval > 0) {
-      clearTimer("poll");
+      clearTimer('poll');
       timersRef.current.poll = setInterval(() => {
-        log("POLL tick");
+        log('POLL tick');
         fetchOnce();
       }, refreshInterval);
     }
 
     return () => {
-      log("UNMOUNT cleanup");
+      log('UNMOUNT cleanup');
       abortRef.current?.abort();
       runningRef.current = false;
       clearAllTimers();
@@ -134,7 +143,7 @@ export default function useSiteStatus({
   }, [fetchOnce, failOpenAfterMs, refreshInterval]);
 
   useEffect(() => {
-    log("STATE", { phase, data, error });
+    log('STATE', { phase, data, error });
   }, [phase, data, error]);
 
   return {
@@ -142,9 +151,9 @@ export default function useSiteStatus({
     phase,
     error,
     reload: fetchOnce,
-    isLoading: phase === "loading",
+    isLoading: phase === 'loading',
     isRefreshing: false,
     isError: false,
-    isSuccess: phase === "success"
+    isSuccess: phase === 'success',
   };
 }

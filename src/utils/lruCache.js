@@ -1,6 +1,6 @@
 // tiny-lru v11+ => named export: { lru }
 // Docs: https://github.com/avoidwork/tiny-lru
-import { lru } from "tiny-lru";
+import { lru } from 'tiny-lru';
 
 /**
  * createLRU
@@ -28,6 +28,6 @@ export function createLRU({ max = 100, ttl = 60_000 } = {}) {
       cache.clear();
     },
     // Gerekirse orijinal nesne
-    raw: cache
+    raw: cache,
   };
 }

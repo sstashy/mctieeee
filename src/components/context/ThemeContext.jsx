@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useCallback
-} from "react";
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 
 /*
   Gelişmiş Tema Mantığı:
@@ -14,25 +8,24 @@ import React, {
   - localStorage key: theme-pref
 */
 
-const STORAGE_KEY = "theme-pref";
+const STORAGE_KEY = 'theme-pref';
 
 function systemPrefersLight() {
   return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: light)").matches
+    typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
   );
 }
 
 function resolveInitial() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark") return { preference: stored, mode: stored };
-    if (stored === "system" || !stored) {
-      const sys = systemPrefersLight() ? "light" : "dark";
-      return { preference: stored || "system", mode: sys };
+    if (stored === 'light' || stored === 'dark') return { preference: stored, mode: stored };
+    if (stored === 'system' || !stored) {
+      const sys = systemPrefersLight() ? 'light' : 'dark';
+      return { preference: stored || 'system', mode: sys };
     }
   } catch {}
-  return { preference: "system", mode: systemPrefersLight() ? "light" : "dark" };
+  return { preference: 'system', mode: systemPrefersLight() ? 'light' : 'dark' };
 }
 
 const ThemeContext = createContext(null);
@@ -44,25 +37,25 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     const root = document.documentElement;
     // Tailwind dark class
-    if (mode === "dark") root.classList.add("dark");
-    else root.classList.remove("dark");
+    if (mode === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
     // Variable light toggler
-    root.classList.toggle("theme-light", mode === "light");
+    root.classList.toggle('theme-light', mode === 'light');
     root.style.colorScheme = mode;
   }, [mode]);
 
   // Watch system changes if preference === system
   useEffect(() => {
-    if (preference !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    if (preference !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
     const handler = () => {
-      setThemeState(s => ({
+      setThemeState((s) => ({
         preference: s.preference,
-        mode: systemPrefersLight() ? "light" : "dark"
+        mode: systemPrefersLight() ? 'light' : 'dark',
       }));
     };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, [preference]);
 
   // Persist preference
@@ -74,36 +67,30 @@ export function ThemeProvider({ children }) {
 
   // Cross-tab sync
   useEffect(() => {
-    const onStorage = e => {
+    const onStorage = (e) => {
       if (e.key === STORAGE_KEY) {
-        const pref = e.newValue || "system";
+        const pref = e.newValue || 'system';
         setThemeState({
           preference: pref,
-            mode:
-              pref === "system"
-                ? systemPrefersLight() ? "light" : "dark"
-                : pref
+          mode: pref === 'system' ? (systemPrefersLight() ? 'light' : 'dark') : pref,
         });
       }
     };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const setTheme = useCallback(nextPref => {
+  const setTheme = useCallback((nextPref) => {
     setThemeState({
       preference: nextPref,
-      mode:
-        nextPref === "system"
-          ? systemPrefersLight() ? "light" : "dark"
-          : nextPref
+      mode: nextPref === 'system' ? (systemPrefersLight() ? 'light' : 'dark') : nextPref,
     });
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState(s => {
+    setThemeState((s) => {
       const current = s.mode;
-      const next = current === "dark" ? "light" : "dark";
+      const next = current === 'dark' ? 'light' : 'dark';
       return { preference: next, mode: next };
     });
   }, []);
@@ -111,9 +98,9 @@ export function ThemeProvider({ children }) {
   const value = {
     mode,
     preference,
-    isDark: mode === "dark",
+    isDark: mode === 'dark',
     setTheme,
-    toggleTheme
+    toggleTheme,
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -121,6 +108,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme ThemeProvider içinde çağrılmalı.");
+  if (!ctx) throw new Error('useTheme ThemeProvider içinde çağrılmalı.');
   return ctx;
 }

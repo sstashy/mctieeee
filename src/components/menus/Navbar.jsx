@@ -1,16 +1,10 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect
-} from "react";
-import AuthModal from "../modals/AuthModal";
-import LoginForm from "../forms/LoginForm";
-import RegisterForm from "../forms/RegisterForm";
-import UserMenu from "./UserMenu";
-import { useTheme } from "../context/ThemeContext";
-import { useAuth } from "../context/AuthContext";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import AuthModal from '../modals/AuthModal';
+import LoginForm from '../forms/LoginForm';
+import RegisterForm from '../forms/RegisterForm';
+import UserMenu from './UserMenu';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import {
   FaDiscord,
   FaSearch,
@@ -19,9 +13,9 @@ import {
   FaTrophy,
   FaBoxOpen,
   FaMoon,
-  FaSun
-} from "react-icons/fa";
-import clsx from "clsx";
+  FaSun,
+} from 'react-icons/fa';
+import clsx from 'clsx';
 
 /* Debounce + raf combine (daha stabil input hissi) */
 function useRafDebounce(fn, delay) {
@@ -41,15 +35,15 @@ function useRafDebounce(fn, delay) {
         ref.current.frame = requestAnimationFrame(() => ref.current.fn(...args));
       }, delay);
     },
-    [delay]
+    [delay],
   );
 }
 
 const NAV_LINKS = Object.freeze([
-  { href: "/", icon: FaHome, label: "Home" },
-  { href: "/clans", icon: FaUsers, label: "Klanlar" },
-  { href: "/tournaments", icon: FaTrophy, label: "Turnuvalar" },
-  { href: "/resourcepacks", icon: FaBoxOpen, label: "Resource Packs" }
+  { href: '/', icon: FaHome, label: 'Home' },
+  { href: '/clans', icon: FaUsers, label: 'Klanlar' },
+  { href: '/tournaments', icon: FaTrophy, label: 'Turnuvalar' },
+  { href: '/resourcepacks', icon: FaBoxOpen, label: 'Resource Packs' },
 ]);
 
 export default function Navbar({ onSearch }) {
@@ -58,13 +52,13 @@ export default function Navbar({ onSearch }) {
 
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
-  const debouncedSearch = useRafDebounce(val => {
+  const debouncedSearch = useRafDebounce((val) => {
     onSearch?.(val);
   }, 250);
 
-  const handleSearchChange = e => {
+  const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchValue(val);
     debouncedSearch(val);
@@ -75,7 +69,7 @@ export default function Navbar({ onSearch }) {
 
   const linkItems = useMemo(
     () =>
-      NAV_LINKS.map(link => {
+      NAV_LINKS.map((link) => {
         const Icon = link.icon;
         return (
           <li key={link.href} role="none">
@@ -90,14 +84,14 @@ export default function Navbar({ onSearch }) {
           </li>
         );
       }),
-    []
+    [],
   );
 
   return (
     <nav
       className={clsx(
-        "navbar-bg beautiful-navbar flex items-center justify-between gap-4 py-2 px-4",
-        "animate-fade-in"
+        'navbar-bg beautiful-navbar flex items-center justify-between gap-4 py-2 px-4',
+        'animate-fade-in',
       )}
       aria-label="Ana navigasyon"
     >
@@ -121,8 +115,7 @@ export default function Navbar({ onSearch }) {
         </a>
         <div className="navbar-title">
           <span className="font-semibold tracking-tight text-base sm:text-lg">
-            Galaxy{" "}
-            <span className="navbar-title-highlight font-bold">Tier</span>
+            Galaxy <span className="navbar-title-highlight font-bold">Tier</span>
           </span>
           <span className="navbar-subtitle text-[11px] uppercase tracking-wider text-gray-300 dark:text-gray-400 mt-[1px]">
             NethPOT Community
@@ -161,11 +154,11 @@ export default function Navbar({ onSearch }) {
         <button
           type="button"
           onClick={toggleTheme}
-            aria-label={`Tema değiştir (Şu an: ${mode === "dark" ? "koyu" : "açık"})`}
+          aria-label={`Tema değiştir (Şu an: ${mode === 'dark' ? 'koyu' : 'açık'})`}
           className="login-btn flex items-center justify-center w-10 h-10 p-0 rounded-lg !bg-transparent !text-[#82cfff] hover:!text-white hover:scale-105 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ea4ff]"
-          style={{ background: "none" }}
+          style={{ background: 'none' }}
         >
-          {mode === "dark" ? <FaSun /> : <FaMoon />}
+          {mode === 'dark' ? <FaSun /> : <FaMoon />}
         </button>
 
         {/* Discord */}
@@ -181,18 +174,10 @@ export default function Navbar({ onSearch }) {
 
         {!user && (
           <>
-            <button
-              className="login-btn"
-              onClick={() => setShowLogin(true)}
-              type="button"
-            >
+            <button className="login-btn" onClick={() => setShowLogin(true)} type="button">
               Giriş Yap
             </button>
-            <button
-              className="register-btn"
-              onClick={() => setShowRegister(true)}
-              type="button"
-            >
+            <button className="register-btn" onClick={() => setShowRegister(true)} type="button">
               Kayıt Ol
             </button>
           </>

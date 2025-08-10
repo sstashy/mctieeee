@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 /**
  * items: [
@@ -22,14 +22,14 @@ export default function useTabKeyboardNav(
   onSelect,
   {
     loop = true,
-    orientation = "horizontal",
-    activation = "focus",
+    orientation = 'horizontal',
+    activation = 'focus',
     initialIndex = 0,
     preventScrollOnFocus = true,
     homeEnd = true,
     pageKeys = false,
-    roving = true
-  } = {}
+    roving = true,
+  } = {},
 ) {
   const currentIndexRef = useRef(initialIndex);
 
@@ -39,7 +39,7 @@ export default function useTabKeyboardNav(
     items.forEach((item, idx) => {
       const el = item.ref?.current;
       if (el) {
-        el.setAttribute("tabindex", idx === initialIndex ? "0" : "-1");
+        el.setAttribute('tabindex', idx === initialIndex ? '0' : '-1');
       }
     });
     currentIndexRef.current = Math.min(initialIndex, items.length - 1);
@@ -57,11 +57,11 @@ export default function useTabKeyboardNav(
         // Aktif item tabindex=0, diğerleri -1
         items.forEach((it, i) => {
           const node = it.ref?.current;
-            if (node) node.setAttribute("tabindex", i === nextIdx ? "0" : "-1");
+          if (node) node.setAttribute('tabindex', i === nextIdx ? '0' : '-1');
         });
       }
       currentIndexRef.current = nextIdx;
-      if (activation === "focus") onSelect?.(item.value);
+      if (activation === 'focus') onSelect?.(item.value);
     }
   };
 
@@ -103,37 +103,37 @@ export default function useTabKeyboardNav(
 
     function keyHandler(e) {
       const key = e.key;
-      const horizontal = orientation === "horizontal" || orientation === "both";
-      const vertical = orientation === "vertical" || orientation === "both";
+      const horizontal = orientation === 'horizontal' || orientation === 'both';
+      const vertical = orientation === 'vertical' || orientation === 'both';
 
-      if (horizontal && (key === "ArrowRight" || key === "ArrowLeft")) {
+      if (horizontal && (key === 'ArrowRight' || key === 'ArrowLeft')) {
         e.preventDefault();
-        move(key === "ArrowRight" ? +1 : -1);
+        move(key === 'ArrowRight' ? +1 : -1);
         return;
       }
-      if (vertical && (key === "ArrowDown" || key === "ArrowUp")) {
+      if (vertical && (key === 'ArrowDown' || key === 'ArrowUp')) {
         e.preventDefault();
-        move(key === "ArrowDown" ? +1 : -1);
+        move(key === 'ArrowDown' ? +1 : -1);
         return;
       }
 
-      if (homeEnd && key === "Home") {
+      if (homeEnd && key === 'Home') {
         e.preventDefault();
         const first = findFirstEnabled();
         if (first >= 0) focusItem(first);
         return;
       }
-      if (homeEnd && key === "End") {
+      if (homeEnd && key === 'End') {
         e.preventDefault();
         const last = findLastEnabled();
         if (last >= 0) focusItem(last);
         return;
       }
 
-      if (pageKeys && (key === "PageUp" || key === "PageDown")) {
+      if (pageKeys && (key === 'PageUp' || key === 'PageDown')) {
         e.preventDefault();
         // Basit örnek: PageUp -> ilk, PageDown -> son
-        if (key === "PageUp") {
+        if (key === 'PageUp') {
           const first = findFirstEnabled();
           if (first >= 0) focusItem(first);
         } else {
@@ -143,7 +143,7 @@ export default function useTabKeyboardNav(
         return;
       }
 
-      if (activation === "manual" && (key === "Enter" || key === " ")) {
+      if (activation === 'manual' && (key === 'Enter' || key === ' ')) {
         // manual modda Enter/Space seçimi tetikler
         const idx = currentIndexRef.current;
         const item = items[idx];
@@ -170,8 +170,8 @@ export default function useTabKeyboardNav(
       }
     }
 
-    el.addEventListener("keydown", keyHandler);
-    return () => el.removeEventListener("keydown", keyHandler);
+    el.addEventListener('keydown', keyHandler);
+    return () => el.removeEventListener('keydown', keyHandler);
   }, [
     containerRef,
     items,
@@ -182,6 +182,6 @@ export default function useTabKeyboardNav(
     pageKeys,
     preventScrollOnFocus,
     roving,
-    onSelect
+    onSelect,
   ]);
 }
